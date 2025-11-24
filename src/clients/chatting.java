@@ -98,17 +98,18 @@ public class chatting extends JPanel {
 
         chatArea = new JPanel();
         jList = new JList(sideList);
+        jList.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
         jList.setForeground(new Color(255, 255, 255));
-        jList.setBackground(new Color(0, 0, 0));
+        jList.setBackground(new Color(128, 128, 128));
         jScrollPane = new JScrollPane(jList);
         chatArea.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         chatArea.setSize(new Dimension(360, 500));
         jScrollPane.setSize(new Dimension(360, 500));
         jScrollPane.setBorder(BorderFactory.createLineBorder(Color.GREEN));
         JPanel container = new JPanel();
-        container.setBackground(new Color(0, 0, 0));
+        container.setBackground(new Color(128, 128, 128));
         JTextField searchBar = new JTextField();
-        searchBar.setBackground(new Color(128, 128, 128));
+        searchBar.setBackground(new Color(192, 192, 192));
         searchBar.setPreferredSize(new Dimension(200, 28));
         container.add(searchBar);
         jList.setSize(new Dimension(360, 500));
@@ -116,12 +117,12 @@ public class chatting extends JPanel {
         container.setLayout(new FlowLayout());
         information = new JButton("Information");
         information.setForeground(Color.WHITE);                     // white text
-        information.setBackground(new Color(0, 102, 204));          // nice solid blue (or use Color.BLUE.darker())
+        information.setBackground(new Color(0, 128, 255));          // nice solid blue (or use Color.BLUE.darker())
         information.setOpaque(true);                                // must have
         information.setContentAreaFilled(true);                     // must have
         information.setBorderPainted(false);                        // removes the ugly border/gradient that hides text
         information.setFocusPainted(false);                         // removes dotted focus rectangle
-        information.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
+        information.setFont(new Font("Comic Sans MS", Font.BOLD, 10));
         container.add(information);
 //        if(isGroup) {
 //        	addMemberButton.setVisible(true);

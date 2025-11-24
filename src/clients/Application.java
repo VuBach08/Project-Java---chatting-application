@@ -33,7 +33,7 @@ public class Application {
     public Application() {
         try {
         	applicationFrame = new JFrame();
-        	applicationFrame.add(new chatting(this));
+        	applicationFrame.add(new Admin_demo(this));
         	Application.app = this;
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));

@@ -46,8 +46,8 @@ public class globalChatHistory extends JPanel {
 	    this.setLayout(new BorderLayout());
 
 	    searchBar = new JTextField();
-	    searchBar.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
-	    searchBar.setBackground(new Color(0, 0, 0));
+	    searchBar.setFont(new Font("Comic Sans MS", Font.ITALIC, 10));
+	    searchBar.setBackground(new Color(0, 128, 255));
 	    chatResults = new DefaultListModel<>();
 
 	    searchBar.setMargin(new Insets(15, 10, 15, 10));
@@ -58,7 +58,8 @@ public class globalChatHistory extends JPanel {
 	    SetPlaceholder(searchBar, "Type A Sentence You Want To Search For");
 
 	    chatDisplay = new JList<>(chatResults);
-	    chatDisplay.setBackground(new Color(0, 0, 0));
+	    chatDisplay.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
+	    chatDisplay.setBackground(new Color(128, 128, 128));
 
 	    searchBar.addActionListener(e -> {
 	    });

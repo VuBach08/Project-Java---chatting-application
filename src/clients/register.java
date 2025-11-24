@@ -34,7 +34,7 @@ public class register extends JPanel {
 	    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 	    JPanel panel_1 = new JPanel();
-	    panel_1.setBackground(Color.WHITE);
+	    panel_1.setBackground(new Color(128, 128, 128));
 	    add(panel_1);
 	    panel_1.setLayout(null);
 
@@ -82,7 +82,7 @@ public class register extends JPanel {
 	    panel_1.add(btnNewButton);
 
 	    JButton btnLogin = new JButton("Login");
-	    btnLogin.setBorder(UIManager.getBorder("Button.border"));
+	    btnLogin.setBorder(null);
 	    btnLogin.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
@@ -90,9 +90,9 @@ public class register extends JPanel {
 	            parent.ChangeTab(new login(parent), 605, 476);
 	        }
 	    });
-	    btnLogin.setForeground(new Color(30, 144, 255));
+	    btnLogin.setForeground(Color.WHITE);
+	    btnLogin.setBackground(new Color(0, 144, 255));
 	    btnLogin.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
-	    btnLogin.setBackground(Color.WHITE);
 	    btnLogin.setBounds(201, 378, 203, 38);
 	    panel_1.add(btnLogin);
 

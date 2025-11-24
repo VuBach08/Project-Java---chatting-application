@@ -160,15 +160,15 @@ public class Admin_demo extends JPanel{
 
         allTab = new JTabbedPane();
         allTab.addTab("Trang chủ", defaultPanel);
-        allTab.addTab("Chức năng 1", panel1); // dua vao de bai de ghi
-        allTab.addTab("Chức năng 2", panel2);
-        allTab.addTab("Chức năng 3", panel3);
-        allTab.addTab("Chức năng 4", panel4);
-        allTab.addTab("Chức năng 5", panel5);
-        allTab.addTab("Chức năng 6", panel6);
-        allTab.addTab("Chức năng 7", panel7);
-        allTab.addTab("Chức năng 8", panel8);
-        allTab.addTab("Chức năng 9", panel9);
+        allTab.addTab("Quản lý danh sách người dùng", panel1); // dua vao de bai de ghi
+        allTab.addTab("Xem danh sách đăng nhập theo thứ tự thời gian", panel2);
+        allTab.addTab("Xem danh sách các nhóm chat", panel3);
+        allTab.addTab("Xem danh sách báo cáo spam", panel4);
+        allTab.addTab("Xem danh sách người dùng đăng ký mới", panel5);
+        allTab.addTab("Biểu đồ người đăng ký mới theo năm", panel6);
+        allTab.addTab("Xem danh sách người dùng và số lượng bạn bè", panel7);
+        allTab.addTab("Xem danh sách người dùng hoạt động", panel8);
+        allTab.addTab("Biểu đồ số lượng người hoạt động theo năm", panel9);
 
         defaultPanel.add(this.trangChu());
         panel1.add(this.trang1());
@@ -593,16 +593,16 @@ public class Admin_demo extends JPanel{
             gbcListNew.gridy = 0;
         }
     }
-    private void updateChartNew(ArrayList<String> ChartValue, String year) {
-        JFreeChart chart = this.createChart(this.createDataset(ChartValue), year);
-        CategoryPlot plot = chart.getCategoryPlot();
-        CategoryAxis xAxis = plot.getDomainAxis();
-        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-        yAxis.setRange(0, 100);
-        chartPanel.setChart(null);
-        chartPanel.revalidate();
-        chartPanel.setChart(chart);
-    }
+//    private void updateChartNew(ArrayList<String> ChartValue, String year) {
+//        JFreeChart chart = this.createChart(this.createDataset(ChartValue), year);
+//        CategoryPlot plot = chart.getCategoryPlot();
+//        CategoryAxis xAxis = plot.getDomainAxis();
+//        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+//        yAxis.setRange(0, 100);
+//        chartPanel.setChart(null);
+//        chartPanel.revalidate();
+//        chartPanel.setChart(chart);
+//    }
     private void updateListFriendPlus(ArrayList<String> listFriendPlusInString, int checkEnd) {
         if (gbcListFriendPlus.gridy == 0) {
             int compCount = listFriendPlus.getComponentCount();
@@ -685,16 +685,16 @@ public class Admin_demo extends JPanel{
             gbcListOpen.gridy = 0;
         }
     }
-    private void updateChartOpen(ArrayList<String> ChartValue, String year) {
-        JFreeChart chart = this.createChart1(this.createDataset1(ChartValue), year);
-        CategoryPlot plot = chart.getCategoryPlot();
-        CategoryAxis xAxis = plot.getDomainAxis();
-        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-        yAxis.setRange(0, 100);
-        chartPanel1.setChart(null);
-        chartPanel1.revalidate();
-        chartPanel1.setChart(chart);
-    }
+//    private void updateChartOpen(ArrayList<String> ChartValue, String year) {
+//        JFreeChart chart = this.createChart1(this.createDataset1(ChartValue), year);
+//        CategoryPlot plot = chart.getCategoryPlot();
+//        CategoryAxis xAxis = plot.getDomainAxis();
+//        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+//        yAxis.setRange(0, 100);
+//        chartPanel1.setChart(null);
+//        chartPanel1.revalidate();
+//        chartPanel1.setChart(chart);
+//    }
 
     private JScrollPane trang1() {
         JPanel mainPanel = new JPanel();

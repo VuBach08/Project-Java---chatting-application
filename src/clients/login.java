@@ -45,7 +45,7 @@ public class login extends JPanel {
 	    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 	    JPanel panel_1 = new JPanel();
-	    panel_1.setBackground(new Color(192, 192, 192));
+	    panel_1.setBackground(new Color(128, 128, 128));
 	    add(panel_1);
 	    panel_1.setLayout(null);
 
@@ -88,10 +88,10 @@ public class login extends JPanel {
 	        public void actionPerformed(ActionEvent e) {
 	        }
 	    });
-	    btnNewButton.setForeground(Color.BLACK);
-	    btnNewButton.setBackground(Color.GREEN);
+	    btnNewButton.setForeground(Color.WHITE);
+	    btnNewButton.setBackground(new Color(0, 128, 255));
 	    btnNewButton.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
-	    btnNewButton.setBounds(201, 246, 203, 38);
+	    btnNewButton.setBounds(201, 243, 203, 38);
 	    panel_1.add(btnNewButton);
 
 	    JButton btnlogin = new JButton("Register");
@@ -104,9 +104,9 @@ public class login extends JPanel {
 	            parent.ChangeTab(new register(parent), 605, 476);
 	        }
 	    });
-	    btnlogin.setForeground(Color.BLACK);
+	    btnlogin.setForeground(Color.WHITE);
 	    btnlogin.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
-	    btnlogin.setBackground(Color.YELLOW);
+	    btnlogin.setBackground(new Color(0, 128, 255));
 	    btnlogin.setBounds(201, 294, 203, 38);
 	    panel_1.add(btnlogin);
 
@@ -121,8 +121,8 @@ public class login extends JPanel {
 	                    "Please specify your email for password recovery");
 	        }
 	    });
-	    resetPW.setForeground(Color.BLACK);
-	    resetPW.setBackground(new Color(255, 0, 0));
+	    resetPW.setForeground(Color.WHITE);
+	    resetPW.setBackground(new Color(0, 128, 255));
 	    resetPW.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    resetPW.setBounds(201, 342, 203, 38);
 	    panel_1.add(resetPW);

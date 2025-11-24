@@ -61,7 +61,7 @@ public class home extends JPanel implements ActionListener {
 	    mainContainer = new JPanel(new CardLayout());
 	    mainPanel = new JPanel(new BorderLayout());
 	    mainPanel.setForeground(new Color(255, 255, 255));
-	    mainPanel.setBackground(new Color(0, 0, 0));
+	    mainPanel.setBackground(new Color(128, 128, 128));
 
 	    int totalWidth = 600;
 	    int userWidth = (int) (totalWidth * 0.4);
@@ -80,7 +80,7 @@ public class home extends JPanel implements ActionListener {
 
 	    JButton toChat = new JButton("Chat With Friends");
 	    toChat.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
-	    toChat.setBackground(new Color(0, 120, 215));
+	    toChat.setBackground(new Color(0, 128, 255));
 	    toChat.setForeground(Color.WHITE);
 	    toChat.setOpaque(true);
 	    toChat.setBorderPainted(false);
@@ -89,7 +89,7 @@ public class home extends JPanel implements ActionListener {
 
 	    JButton toFriends = new JButton("Find Friends");
 	    toFriends.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
-	    toFriends.setBackground(new Color(0, 120, 215));
+	    toFriends.setBackground(new Color(0, 128, 255));
 	    toFriends.setForeground(Color.WHITE);
 	    toFriends.setOpaque(true);
 	    toFriends.setBorderPainted(false);
@@ -98,7 +98,7 @@ public class home extends JPanel implements ActionListener {
 
 	    JButton toChatHistory = new JButton("Search In Chat");
 	    toChatHistory.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
-	    toChatHistory.setBackground(new Color(0, 120, 215));
+	    toChatHistory.setBackground(new Color(0, 128, 255));
 	    toChatHistory.setForeground(new Color(255, 255, 255));
 	    toChatHistory.setOpaque(true);
 	    toChatHistory.setBorderPainted(false);
@@ -106,7 +106,7 @@ public class home extends JPanel implements ActionListener {
 	    toChatHistory.addActionListener(this);
 	    
 	    JButton toCreateGroup = new JButton("Create Group");
-	    toCreateGroup.setBackground(new Color(0, 120, 215)); 
+	    toCreateGroup.setBackground(new Color(0, 128, 255)); 
 	    toCreateGroup.setForeground(Color.WHITE);
 	    toCreateGroup.setOpaque(true);
 	    toCreateGroup.setBorderPainted(false);

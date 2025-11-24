@@ -28,9 +28,9 @@ public class register extends JPanel {
 
 	private void initialize() {
 	    setForeground(Color.BLACK);
-	    setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));
+	    setFont(new Font("Comics San MS", Font.PLAIN, 12));
 	    setBackground(Color.WHITE);
-	    setFont(new Font("Source Code Pro Medium", Font.PLAIN, 11));
+	    setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 	    JPanel panel_1 = new JPanel();
@@ -39,31 +39,34 @@ public class register extends JPanel {
 	    panel_1.setLayout(null);
 
 	    JLabel lblNewLabel = new JLabel("Register");
+	    lblNewLabel.setForeground(new Color(255, 255, 255));
 	    lblNewLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
 	    lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	    lblNewLabel.setBounds(157, 36, 290, 28);
 	    panel_1.add(lblNewLabel);
 
 	    email = new JTextField();
-	    email.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    email.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    email.setPreferredSize(new Dimension(7, 22));
 	    email.setBounds(201, 216, 202, 28);
 	    panel_1.add(email);
 	    email.setColumns(10);
 
 	    JLabel lblNewLabel_1 = new JLabel("email:");
+	    lblNewLabel_1.setForeground(new Color(255, 255, 255));
 	    lblNewLabel_1.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1.setBounds(201, 195, 202, 14);
 	    panel_1.add(lblNewLabel_1);
 
 	    password = new JPasswordField();
-	    password.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    password.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    password.setPreferredSize(new Dimension(7, 22));
 	    password.setColumns(10);
 	    password.setBounds(201, 276, 202, 28);
 	    panel_1.add(password);
 
 	    JLabel lblNewLabel_1_1 = new JLabel("password:");
+	    lblNewLabel_1_1.setForeground(new Color(255, 255, 255));
 	    lblNewLabel_1_1.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1_1.setBounds(201, 255, 202, 14);
 	    panel_1.add(lblNewLabel_1_1);
@@ -76,7 +79,7 @@ public class register extends JPanel {
 	        }
 	    });
 	    btnNewButton.setForeground(Color.WHITE);
-	    btnNewButton.setBackground(new Color(30, 144, 255));
+	    btnNewButton.setBackground(new Color(32, 178, 170));
 	    btnNewButton.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    btnNewButton.setBounds(201, 330, 203, 38);
 	    panel_1.add(btnNewButton);
@@ -97,25 +100,29 @@ public class register extends JPanel {
 	    panel_1.add(btnLogin);
 
 	    name = new JTextField();
-	    name.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    name.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    name.setPreferredSize(new Dimension(7, 22));
 	    name.setColumns(10);
 	    name.setBounds(201, 161, 202, 28);
 	    panel_1.add(name);
 
 	    JLabel lblNewLabel_1_2 = new JLabel("name:");
+	    lblNewLabel_1_2.setBackground(new Color(255, 255, 255));
+	    lblNewLabel_1_2.setForeground(new Color(255, 255, 255));
 	    lblNewLabel_1_2.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1_2.setBounds(201, 140, 202, 14);
 	    panel_1.add(lblNewLabel_1_2);
 
 	    JLabel lblNewLabel_1_2_1 = new JLabel("fullname:");
+	    lblNewLabel_1_2_1.setForeground(new Color(255, 255, 255));
+	    lblNewLabel_1_2_1.setBackground(new Color(255, 255, 255));
 	    lblNewLabel_1_2_1.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1_2_1.setBounds(201, 80, 202, 14);
 	    panel_1.add(lblNewLabel_1_2_1);
 
 	    fullname = new JTextField();
 	    fullname.setPreferredSize(new Dimension(7, 22));
-	    fullname.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    fullname.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    fullname.setColumns(10);
 	    fullname.setBounds(201, 101, 202, 28);
 	    panel_1.add(fullname);

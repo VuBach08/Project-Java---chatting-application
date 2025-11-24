@@ -50,31 +50,34 @@ public class login extends JPanel {
 	    panel_1.setLayout(null);
 
 	    JLabel lblNewLabel = new JLabel("Login");
+	    lblNewLabel.setForeground(new Color(255, 255, 255));
 	    lblNewLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
 	    lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 	    lblNewLabel.setBounds(157, 70, 290, 28);
 	    panel_1.add(lblNewLabel);
 
 	    email = new JTextField();
-	    email.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    email.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    email.setPreferredSize(new Dimension(7, 22));
 	    email.setBounds(201, 129, 202, 28);
 	    panel_1.add(email);
 	    email.setColumns(10);
 
 	    JLabel lblNewLabel_1 = new JLabel("email or username:");
+	    lblNewLabel_1.setForeground(new Color(255, 255, 255));
 	    lblNewLabel_1.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1.setBounds(201, 108, 202, 14);
 	    panel_1.add(lblNewLabel_1);
 
 	    password = new JPasswordField();
-	    password.setFont(new Font("Source Code Pro", Font.PLAIN, 11));
+	    password.setFont(new Font("Comics San MS", Font.PLAIN, 11));
 	    password.setPreferredSize(new Dimension(7, 22));
 	    password.setColumns(10);
 	    password.setBounds(201, 189, 202, 28);
 	    panel_1.add(password);
 
 	    JLabel lblNewLabel_1_1 = new JLabel("password:");
+	    lblNewLabel_1_1.setForeground(new Color(255, 255, 255));
 	    lblNewLabel_1_1.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    lblNewLabel_1_1.setBounds(201, 168, 202, 14);
 	    panel_1.add(lblNewLabel_1_1);
@@ -106,7 +109,7 @@ public class login extends JPanel {
 	    });
 	    btnlogin.setForeground(Color.WHITE);
 	    btnlogin.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
-	    btnlogin.setBackground(new Color(0, 128, 255));
+	    btnlogin.setBackground(new Color(32, 178, 170));
 	    btnlogin.setBounds(201, 294, 203, 38);
 	    panel_1.add(btnlogin);
 
@@ -121,8 +124,8 @@ public class login extends JPanel {
 	                    "Please specify your email for password recovery");
 	        }
 	    });
-	    resetPW.setForeground(Color.WHITE);
-	    resetPW.setBackground(new Color(0, 128, 255));
+	    resetPW.setForeground(new Color(255, 255, 255));
+	    resetPW.setBackground(new Color(255, 0, 128));
 	    resetPW.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
 	    resetPW.setBounds(201, 342, 203, 38);
 	    panel_1.add(resetPW);

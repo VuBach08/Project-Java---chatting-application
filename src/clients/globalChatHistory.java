@@ -22,23 +22,6 @@ public class globalChatHistory extends JPanel {
 	    textField.setForeground(new Color(255, 255, 255));
 	    textField.setText(placeholder);
 
-	    textField.addFocusListener(new java.awt.event.FocusAdapter() {
-	        @Override
-	        public void focusGained(java.awt.event.FocusEvent e) {
-	            if (textField.getText().equals(placeholder)) {
-	                textField.setText("");
-	                textField.setForeground(Color.BLACK);
-	            }
-	        }
-
-	        @Override
-	        public void focusLost(java.awt.event.FocusEvent e) {
-	            if (textField.getText().isEmpty()) {
-	                textField.setForeground(Color.GRAY);
-	                textField.setText(placeholder);
-	            }
-	        }
-	    });
 	}
 
 	public globalChatHistory(Application app) {
@@ -61,8 +44,6 @@ public class globalChatHistory extends JPanel {
 	    chatDisplay.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    chatDisplay.setBackground(new Color(128, 128, 128));
 
-	    searchBar.addActionListener(e -> {
-	    });
 
 	    JPanel displayPanel = new JPanel(new BorderLayout());
 	    displayPanel.setSize(new Dimension(600, 600));

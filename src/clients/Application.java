@@ -33,13 +33,26 @@ public class Application {
     public Application() {
         try {
         	applicationFrame = new JFrame();
-        	applicationFrame.add(new Admin_demo(this));
+        	User currentUser = null;
+        	onlineUsers onlList = new onlineUsers(app, currentUser);
+        	friends flist = new friends(app,currentUser);
+			chatting c = new chatting(app);
+			globalChatHistory gbc = new globalChatHistory(app);
+			ClearTab();
+			boolean isAdmin = false;
+			if (isAdmin) {
+				ChangeTab(new Admin_demo(app), 1000, 1300);
+			} else {
+			
+				applicationFrame.getContentPane().setLayout(new BorderLayout());
+				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
+			}
         	Application.app = this;
             applicationFrame.setForeground(Color.BLACK);
-            applicationFrame.setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));
+            applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);
             applicationFrame.setBackground(Color.WHITE);
-            applicationFrame.getContentPane().setFont(new Font("Source Code Pro Medium", Font.PLAIN, 11));
+            applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
             applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
         	applicationFrame.setBounds(100, 100, 605, 476);
             applicationFrame.setVisible(true);
@@ -63,14 +76,14 @@ public class Application {
     }
 
     public void ChangeTab(JPanel newPanel,int h,int w) {
-    	applicationFrame.add(newPanel);
+    	applicationFrame.getContentPane().add(newPanel);
 
     	applicationFrame.setForeground(Color.BLACK);
         applicationFrame.setTitle("Login");
-        applicationFrame.setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));
+        applicationFrame.setFont(new Font("Comics San MS", Font.PLAIN, 12));
         applicationFrame.getContentPane().setBackground(Color.WHITE);
         applicationFrame.setBackground(Color.WHITE);
-        applicationFrame.getContentPane().setFont(new Font("Source Code Pro Medium", Font.PLAIN, 11));
+        applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
         applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
     	applicationFrame.pack();
         applicationFrame.setVisible(true);

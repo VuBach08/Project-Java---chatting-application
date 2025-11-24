@@ -91,7 +91,7 @@ public class chatting extends JPanel {
         this.setBackground(Color.BLUE);
         this.setForeground(Color.BLUE);
 
-        this.setFont(new Font("Source Code Pro", Font.PLAIN, 14));
+        this.setFont(new Font("Comics San MS", Font.PLAIN, 14));
         this.setBounds(100, 100, 360, 800);
 
         sideList = new DefaultListModel<>();
@@ -139,7 +139,7 @@ public class chatting extends JPanel {
         this.add(container, BorderLayout.NORTH);
         chatArea.add(jScrollPane, BorderLayout.CENTER);
         chatArea.setLayout(new BorderLayout());
-        Font font = new Font("Arial", Font.BOLD, 14); // Font(name, style, size)
+        Font font = new Font("Comics San MS", Font.BOLD, 14); // Font(name, style, size)
         chatArea.setFont(font);
 
         searchBar.getDocument().addDocumentListener(new DocumentListener() {

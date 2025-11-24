@@ -52,7 +52,7 @@ public class onlineUsers extends JPanel {
                 if (((User) value).chatWithU) {
                     setForeground(Color.RED);
                 } else {
-                    setForeground(Color.BLUE);
+                    setForeground(Color.WHITE);
                 }
             }
             if (value instanceof groupChat) {

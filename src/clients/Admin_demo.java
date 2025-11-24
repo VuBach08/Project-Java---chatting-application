@@ -32,6 +32,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.jfree.chart.ChartFactory;
@@ -138,6 +139,26 @@ public class Admin_demo extends JPanel{
      */
     public Admin_demo(Application app) {
         this.parent = app;
+
+        java.util.Enumeration<Object> keys = UIManager.getDefaults().keys();
+        java.util.Hashtable<Object, Object> original = new java.util.Hashtable<>();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            if (key.toString().endsWith(".font")) {
+                original.put(key, UIManager.get(key));
+            }
+        }
+
+        Font mediumFont = new Font("Times New Roman", Font.PLAIN, 16);
+        Font smallFont = new Font("Times New Roman", Font.PLAIN, 14);
+
+        UIManager.put("Button.font", mediumFont);
+        UIManager.put("Label.font", mediumFont);
+        UIManager.put("TextField.font", smallFont);
+        UIManager.put("RadioButton.font", mediumFont);
+        UIManager.put("CheckBox.font", mediumFont);
+        UIManager.put("TabbedPane.font", mediumFont);
+
         initialize();
     }
 
@@ -593,16 +614,6 @@ public class Admin_demo extends JPanel{
             gbcListNew.gridy = 0;
         }
     }
-//    private void updateChartNew(ArrayList<String> ChartValue, String year) {
-//        JFreeChart chart = this.createChart(this.createDataset(ChartValue), year);
-//        CategoryPlot plot = chart.getCategoryPlot();
-//        CategoryAxis xAxis = plot.getDomainAxis();
-//        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-//        yAxis.setRange(0, 100);
-//        chartPanel.setChart(null);
-//        chartPanel.revalidate();
-//        chartPanel.setChart(chart);
-//    }
     private void updateListFriendPlus(ArrayList<String> listFriendPlusInString, int checkEnd) {
         if (gbcListFriendPlus.gridy == 0) {
             int compCount = listFriendPlus.getComponentCount();
@@ -685,16 +696,6 @@ public class Admin_demo extends JPanel{
             gbcListOpen.gridy = 0;
         }
     }
-//    private void updateChartOpen(ArrayList<String> ChartValue, String year) {
-//        JFreeChart chart = this.createChart1(this.createDataset1(ChartValue), year);
-//        CategoryPlot plot = chart.getCategoryPlot();
-//        CategoryAxis xAxis = plot.getDomainAxis();
-//        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
-//        yAxis.setRange(0, 100);
-//        chartPanel1.setChart(null);
-//        chartPanel1.revalidate();
-//        chartPanel1.setChart(chart);
-//    }
 
     private JScrollPane trang1() {
         JPanel mainPanel = new JPanel();
@@ -1474,7 +1475,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 4a & 4b & 4c
+        // chức năng 4
         listSpam = new JPanel();
         listSpam.setSize(800, 800);
         listSpam.setLayout(new GridBagLayout());
@@ -1603,7 +1604,7 @@ public class Admin_demo extends JPanel{
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
-
+        
         // chức năng 5a & 5b
         listNew = new JPanel();
         listNew.setSize(800, 800);
@@ -1789,7 +1790,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 7a & 7b & 7c
+        // chức năng 7
         listFriendPlus = new JPanel();
         listFriendPlus.setSize(800, 800);
         listFriendPlus.setLayout(new GridBagLayout());
@@ -1895,7 +1896,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 8a & 8b & 8c
+        // chức năng 8
         listOpen = new JPanel();
         listOpen.setSize(800, 800);
         listOpen.setLayout(new GridBagLayout());

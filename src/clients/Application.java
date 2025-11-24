@@ -11,6 +11,10 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+import javax.swing.ImageIcon;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -33,6 +37,9 @@ public class Application {
     public Application() {
         try {
         	applicationFrame = new JFrame();
+        	
+        	Image icon = new ImageIcon(getClass().getResource("/icons/discord.png")).getImage();
+            applicationFrame.setIconImage(icon);
         	User currentUser = null;
         	onlineUsers onlList = new onlineUsers(app, currentUser);
         	friends flist = new friends(app,currentUser);
@@ -44,10 +51,11 @@ public class Application {
 				ChangeTab(new Admin_demo(app), 1000, 1300);
 			} else {
 			
-				applicationFrame.getContentPane().setLayout(new BorderLayout());
-				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
+//				applicationFrame.getContentPane().setLayout(new BorderLayout());
+//				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
 			}
         	Application.app = this;
+        	applicationFrame.add(new Admin_demo(this));
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);

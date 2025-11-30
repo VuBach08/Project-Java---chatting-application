@@ -128,11 +128,6 @@ public class Admin_demo extends JPanel{
     /**
      * Launch the application.
      */
-//    public static void main(String[] args) {
-//        Admin_demo window = new Admin_demo();
-//        window.frame.setVisible(true);
-//        window.setUpSocket();
-//    }
 
     /**
      * Create the application.

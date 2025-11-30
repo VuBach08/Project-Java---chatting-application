@@ -3,6 +3,7 @@ package clients;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,11 +12,8 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import java.awt.Image;
-import java.awt.Toolkit;
-import javax.swing.ImageIcon;
-
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,13 +24,55 @@ public class Application {
     private static BufferedWriter os;
     private static BufferedReader is;
     private Socket socketOfClient;
-
+    public User currentUser;
+    public static String id;
+    public static String userID;
     public static Application app;
     public JPanel mainPanel;
     public String focusIDString;
     public String focusNameString;
     public boolean isClosed;
- 
+    
+    public void write(String message) throws IOException{
+        os.write(message + "|" + id);
+        os.newLine();
+        os.flush();
+    }
+    
+    public void setUpSocket() {
+        try {
+            thread = new Thread() {
+                @Override
+                public void run() {
+
+                    try {
+                        socketOfClient = new Socket("127.0.0.1", 7777);
+                        System.out.println("Successfully Connected!");
+                        // Tạo luồng đầu ra tại client (Gửi dữ liệu tới server)
+                        os = new BufferedWriter(new OutputStreamWriter(socketOfClient.getOutputStream()));
+                        // Luồng đầu vào tại Client (Nhận dữ liệu từ server).
+                        is = new BufferedReader(new InputStreamReader(socketOfClient.getInputStream()));
+                        String message;
+                        while (!isClosed) {
+                        	}
+                        os.close();
+                        is.close();
+                        socketOfClient.close();
+                        } catch (UnknownHostException e) {
+                        	isClosed = true;
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+
+                thread.run();
+            } catch (Exception e) {
+            	isClosed = true;
+            }
+        }
+
 
     public Application() {
         try {
@@ -55,7 +95,7 @@ public class Application {
 //				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
 			}
         	Application.app = this;
-        	applicationFrame.add(new Admin_demo(this));
+        	applicationFrame.add(new register(this));
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);
@@ -101,5 +141,6 @@ public class Application {
 
     public static void main(String[] args) {
         app = new Application();
+        app.setUpSocket();
     }
 }

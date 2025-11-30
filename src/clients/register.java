@@ -1,10 +1,11 @@
 package clients;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.UUID;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -19,11 +20,18 @@ public class register extends JPanel {
 	private JTextField email;
 	private JPasswordField password;
 	private JTextField name;
+
+	private static int maxUserID = 1000000;
+	private static int minUserID = 1;
 	private Application parent;
 	private JTextField fullname;
+
+	/**
+	 * Create the application.
+	 */
 	public register(Application app) {
-	    this.parent = app;
-	    initialize();
+		this.parent = app;
+		initialize();
 	}
 
 	private void initialize() {
@@ -76,8 +84,23 @@ public class register extends JPanel {
 	    btnNewButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
-	        }
-	    });
+				if(name.getText() != "" && password.getText() != "" && email.getText() != "") {
+					String id = UUID.randomUUID().toString();
+					String hashedPW = User.hashPassword(password.getText());
+
+					if (hashedPW == null) hashedPW = password.getText();
+					System.out.println("Register|"+id+"|"+name.getText()+"|"+fullname.getText()+"|"+email.getText()+"|"+hashedPW);
+
+					try {
+						parent.write("Register|"+id+"|"+name.getText()+"|"+fullname.getText()+"|"+email.getText()+"|"+hashedPW);
+					}catch (IOException ex) {
+						System.out.println("An error occurred");
+						ex.printStackTrace();
+					}
+
+				}
+			}
+		});
 	    btnNewButton.setForeground(Color.WHITE);
 	    btnNewButton.setBackground(new Color(32, 178, 170));
 	    btnNewButton.setFont(new Font("Comic Sans MS", Font.BOLD, 11));

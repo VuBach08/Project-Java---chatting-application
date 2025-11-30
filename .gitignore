@@ -1,0 +1,44 @@
+# Java-specific files
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+# Maven build output
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+# Gradle build output
+gradle/
+build/
+# IntelliJ IDEA files
+idea/
+*.iml
+out/
+# Eclipse IDE files
+settings/
+bin/
+classpath
+project
+# NetBeans IDE files
+nbproject/private/
+build/
+dist/
+# OS-specific files
+DS_Store
+# Logs and temporary files
+*.log
+*.tmp
+
+# --- FIX FOR ECLIPSE METADATA ---
+.metadata/
+*/.metadata/
+src/.metadata/
+
+# --- CORRECTIONS (Eclipse files usually have dots) ---
+.settings/
+.classpath
+.project

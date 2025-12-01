@@ -52,9 +52,44 @@ public class Application {
                         os = new BufferedWriter(new OutputStreamWriter(socketOfClient.getOutputStream()));
                         // Luồng đầu vào tại Client (Nhận dữ liệu từ server).
                         is = new BufferedReader(new InputStreamReader(socketOfClient.getInputStream()));
-                        String message;
                         while (!isClosed) {
-                        	}
+                            try {
+                                String message = is.readLine();
+                                if (message == null) {
+                                    break;
+                                }
+                                System.out.println("Server: " + message);
+
+                                // Xử lý đăng nhập thành công
+                                if (message.startsWith("Login_Success")) {
+                                    java.awt.Component[] components = applicationFrame.getContentPane().getComponents();
+                                    for (java.awt.Component comp : components) {
+                                        if (comp instanceof login) {
+                                            ((login) comp).showLoginSuccess();
+                                            break;
+                                        }
+                                    }
+                                }
+                                // Xử lý đăng nhập thất bại
+                                else if (message.startsWith("Login_Failed")) {
+                                    java.awt.Component[] components = applicationFrame.getContentPane().getComponents();
+                                    for (java.awt.Component comp : components) {
+                                        if (comp instanceof login) {
+                                            ((login) comp).showLoginFailed();
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // Sau này bạn sẽ thêm xử lý chat, online list, v.v. ở đây
+
+                            } catch (IOException e) {
+                                isClosed = true;
+                                System.out.println("Mất kết nối với server!");
+                                JOptionPane.showMessageDialog(applicationFrame, "Mất kết nối tới server!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                                break;
+                            }
+                        }
                         os.close();
                         is.close();
                         socketOfClient.close();
@@ -95,7 +130,7 @@ public class Application {
 //				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
 			}
         	Application.app = this;
-        	applicationFrame.add(new register(this));
+        	applicationFrame.add(new login(this));
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);

@@ -22,6 +22,7 @@ public class login extends JPanel {
 	private JTextField email;
 	private JPasswordField password;
 	private Application parent;
+	private JButton btnLoginStatus;
 	/**
 	 * Create the application.
 	 */
@@ -52,11 +53,12 @@ public class login extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 		JPanel panel_1 = new JPanel();
-		panel_1.setBackground(new Color(128, 128, 128));
+		panel_1.setBackground(new Color(192, 192, 192));
 		add(panel_1);
 		panel_1.setLayout(null);
 
 		JLabel lblNewLabel = new JLabel("Login");
+		lblNewLabel.setForeground(new Color(255, 255, 255));
 		lblNewLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNewLabel.setBounds(157, 70, 290, 28);
@@ -125,7 +127,7 @@ public class login extends JPanel {
 		});
 		btnlogin.setForeground(new Color(30, 144, 255));
 		btnlogin.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
-		btnlogin.setBackground(new Color(255, 255, 255));
+		btnlogin.setBackground(Color.WHITE);
 		btnlogin.setBounds(201, 294, 203, 38);
 		panel_1.add(btnlogin);
 
@@ -145,11 +147,28 @@ public class login extends JPanel {
 		});
 		resetPW.setForeground(Color.WHITE);
 		resetPW.setBackground(Color.RED);
-		resetPW.setFont(new Font("Comic Sans MS", Font.BOLD, 11));
+		resetPW.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 		resetPW.setBounds(201, 342, 203, 38);
 		panel_1.add(resetPW);
-
+		
 		setBounds(100, 100, 605, 476);
 //		frmLogin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	public void showLoginSuccess() {
+	    JOptionPane.showMessageDialog(
+	        this,
+	        "Login successful!\nWelcome back to the app!",
+	        "Login Success",
+	        JOptionPane.INFORMATION_MESSAGE
+	    );
+	}
+
+	public void showLoginFailed() {
+	    JOptionPane.showMessageDialog(
+	        this,
+	        "Wrong username/email or password!\nPlease try again.",
+	        "Login Failed",
+	        JOptionPane.ERROR_MESSAGE
+	    );
 	}
 }

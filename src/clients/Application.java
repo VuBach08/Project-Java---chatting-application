@@ -95,13 +95,54 @@ public class Application {
                         	JOptionPane.showMessageDialog(applicationFrame,"Please Check your email");
                     	}else if(dataSplit[0].equals("Reset_password")){
                         	JOptionPane.showMessageDialog(applicationFrame,"Please Check your email");
-                    	}
-                        else if(dataSplit[0].equals("Register_Success")) {
+                    	}else if(dataSplit[0].equals("Register_Success")) {
                         	System.out.print("Register_Success");
                         	JOptionPane.showMessageDialog(applicationFrame, "You are successfully registered, you will be redirected to the login page shortly");
                         	ClearTab();
                         	ChangeTab(new login(app),605, 476);
-                        }    
+                        }else if(dataSplit[0].equals("OnlineList")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		onlineUsers olUsers  = (onlineUsers)home.userPanel;
+                        		friends flist  = (friends)home.friendsList;
+                        		
+                        		currentUser.friends.clear();
+                        		currentUser.groupList.clear();
+                        		String[] current = message.split("\\|\\|");
+                        		for(int i= 1;i < current.length;++i) {
+                        			String[] m = current[i].split("\\|");
+
+                        			if(m[0].equals("user")) {
+                        				currentUser.friends.add(new User(m[1],m[2],m[3].equals("true") ? true : false));
+                        			}
+                        			if(m[0].equals("group")) {
+                        				currentUser.groupList.add(new groupChat(m[1], m[2]));
+                        			}
+                        		}
+
+                        		olUsers.ClearChat();
+                        		olUsers.UpdateList(currentUser);
+                        	}
+                        }else if(dataSplit[0].equals("GetFriend")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		friends flist  = (friends)home.friendsList;
+                        		
+                        		currentUser.friends.clear();
+
+                        		String[] current = message.split("\\|\\|");
+                        		for(int i= 1;i < current.length;++i) {
+                        			String[] m = current[i].split("\\|");
+
+                        			currentUser.friends.add(new User(m[0],m[1],false));
+                        			
+                        		}
+                        		flist.ClearList();
+                        		flist.UpdateList(currentUser);
+                        	}
+                        }else if(dataSplit[0].equals("AddFriendSuccess")) {
+                        	JOptionPane.showMessageDialog(mainPanel, "You just added new friend to the friends list");
+                        }
                     }
                     os.close();
                     is.close();

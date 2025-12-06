@@ -93,13 +93,14 @@ public class ServerThread implements Runnable {
 
             String message;
             while (!isClosed) {
-                message = is.readLine();
+            	message = is.readLine();
                 if (message == null) {
                     break;
                 }
+                System.out.println("cmd:"+" "+message);
                 String[] messageSplit = message.split("\\|");
                 String commandString = messageSplit[0];
-                commandString = commandString.trim();
+                System.out.println(commandString);
                 if(commandString.equals("Register")) {
                 	
                 	if(userRepo.register(messageSplit[1],messageSplit[2],messageSplit[3],messageSplit[4],messageSplit[5])) {
@@ -120,6 +121,14 @@ public class ServerThread implements Runnable {
                     	System.out.println("Login failed for user ID: " + actual_userID);
                         write("Login_Failed|");                        // Gửi thất bại
                         System.out.println("Login failed for: " + messageSplit[1]);
+                    }
+                }else if (commandString.equals("AddFriend")) {
+                    String id1 = messageSplit[1];//From
+                    String id2 = messageSplit[2];//To
+                    String actual_idString = AddFriend(id1, id2);
+                    if(!actual_idString.equals("")) {
+                    	Server.serverThreadBus.boardCastUser(actual_idString, "AddFriendSuccess");
+                    	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "AddFriendSuccess");
                     }
                 }
             }
@@ -218,5 +227,39 @@ public class ServerThread implements Runnable {
    			// print SQL exception information
    			return "";
    		}
+    }
+    public static String AddFriend(String userId, String FriendName) {
+        String ADD_FRIEND_SQL = "UPDATE public.\"users\" SET friends = array_append(friends,?)"
+                + "WHERE id =? and exists (select * from public.\"users\" where id = ?)";
+        String FIND_USER = "SELECT id FROM public.\"users\" WHERE id = ? or username = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(ADD_FRIEND_SQL);
+             PreparedStatement preparedStatement1 = connection.prepareStatement(ADD_FRIEND_SQL);
+        		PreparedStatement preparedStatement2 = connection.prepareStatement(FIND_USER)) {
+        	String FriendId;
+        	preparedStatement2.setString(1, FriendName);
+        	preparedStatement2.setString(2, FriendName);
+        	ResultSet rSet = preparedStatement2.executeQuery();
+        	if(rSet.next()) {
+        		FriendId = rSet.getString("id");
+        		if(!FriendId.equals(userId)) {
+		            preparedStatement.setString(1, userId);
+		            preparedStatement.setString(2, FriendId);
+		            preparedStatement.setString(3, userId);
+		            preparedStatement1.setString(1, FriendId);
+		            preparedStatement1.setString(2, userId);
+		            preparedStatement1.setString(3, userId);
+	
+		            int count = preparedStatement.executeUpdate();
+		            int count1 = preparedStatement1.executeUpdate();
+		            return FriendId;
+        		}
+        	}
+           return "";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return "";
+        }
     }
 }

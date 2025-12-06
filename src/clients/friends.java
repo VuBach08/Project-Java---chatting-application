@@ -85,49 +85,6 @@ public class friends extends JPanel {
         JMenuItem unfriend = new JMenuItem("Unfriend");
         JMenuItem block = new JMenuItem("Block");
 
-        unfriend.addActionListener(e -> {
-            User deletedFriend = list.getSelectedValue();
-
-            String fromUser = user.getId();
-            String deletedUser = deletedFriend.getId();
-
-            if (deletedUser != null) {
-                if (JOptionPane.showConfirmDialog(this, "Are you sure you want to remove " + deletedFriend.getName() + " from your friends list?","Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                    try {
-                    	parent.write("DeleteFriend|"+fromUser+"|"+deletedUser);
-                        JOptionPane.showMessageDialog(this, "Successfully removed " + deletedFriend.getName() + " from the friends list");
-
-                        allFriends.removeElement(deletedFriend);
-                    } catch (IOException ex) {
-                        ex.getStackTrace();
-                        System.out.println("Unable to carry out action");
-                    }
-                }
-            }
-        });
-
-        block.addActionListener(e -> {
-            User blockedFriend = list.getSelectedValue();
-
-            String fromUser = user.getId();
-            String blockedUser = blockedFriend.getId();
-
-            if (blockedUser != null) {
-                if (JOptionPane.showConfirmDialog(this, "Are you sure you want to block " + blockedFriend.getName() + "?", "Confirmation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-                {
-                    try {
-                    	parent.write("BlockAccount|"+fromUser+"|"+blockedUser);
-                        JOptionPane.showMessageDialog(this, "User " + blockedFriend.getName() + " blocked from the friends list");
-
-                        allFriends.removeElement(blockedFriend);
-                    } catch (IOException ex) {
-                        ex.getStackTrace();
-                        System.out.println("Unable to carry out action");
-                    }
-                }
-            }
-        });
-
         popupMenu.add(block);
         popupMenu.add(unfriend);
         popupMenu.show(list, x, y);
@@ -168,6 +125,7 @@ public class friends extends JPanel {
 
                 if (!searchBar.getText().equals("") && app.currentUser != null) {
                     try {
+                    	System.out.println("Sent friend request");
                     	parent.write("AddFriend|" + fromUser + "|" + toUser);
                         searchBar.setText("");
                     } catch (IOException ex) {

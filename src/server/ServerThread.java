@@ -113,23 +113,27 @@ public class ServerThread implements Runnable {
                         String[] info = result.split("\\|");
                         actual_userID = info[0];
                         this.userID = actual_userID; // Cập nhật đúng userID trong bus
-                        write("Login_Success|" + result);           // Gửi thành công
                         System.out.println("Login success for user ID: " + actual_userID);
+                        write("Login_Success|" + result);           // Gửi thành công
+                       
                     } else {
+                    	System.out.println("Login failed for user ID: " + actual_userID);
                         write("Login_Failed|");                        // Gửi thất bại
                         System.out.println("Login failed for: " + messageSplit[1]);
                     }
                 }
             }
-        } 
-            catch (IOException e) {
+        } catch (IOException e) {
             isClosed = true;
-            if(!actual_userID.equals("")) {
-            	userRepo.SetOffline(actual_userID);
-            }
-            Server.serverThreadBus.remove(userID);
             
-            System.out.println(userID + " exited " + actual_userID);
+            // Safe null check
+            if (actual_userID != null && !actual_userID.isEmpty()) {
+                userRepo.SetOffline(actual_userID);
+            }
+            
+            Server.serverThreadBus.remove(userID);
+            System.out.println("Client " + userID + " disconnected" + 
+                              (actual_userID != null ? " (user: " + actual_userID + ")" : ""));
         }
     }
 
@@ -137,5 +141,82 @@ public class ServerThread implements Runnable {
         os.write(message);
         os.newLine();
         os.flush();
+    }
+    
+    public static boolean Register(String id,String name,String fullname,String email,String password) {
+    	String INSERT_USERS_SQL = "INSERT INTO public.\"users\" (id, username,fullname, email, password, \"createAt\") values (?,?,?,?,?,?)";
+    	String USER_EXIST = "SELECT * FROM public.\"users\" where email = ? or username = ?";
+    	try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+   			 PreparedStatement stmt = connection.prepareStatement(USER_EXIST);
+   			 // Step 2:Create a statement using connection object
+   			 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
+            ZoneId utc = ZoneId.of("UTC+7");
+            ZonedDateTime curDate = ZonedDateTime.now(utc);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedDate = curDate.format(formatter);
+            Date sqlDate = Date.valueOf(formattedDate);
+
+   			preparedStatement.setString(1, id);
+   			preparedStatement.setString(2, name);
+   			preparedStatement.setString(3, fullname);
+   			preparedStatement.setString(4, email);
+   			preparedStatement.setString(5, password);
+            preparedStatement.setDate(6, sqlDate);
+            System.out.println(preparedStatement);
+   			stmt.setString(1, email);
+   			stmt.setString(2, name );
+   			ResultSet rs = stmt.executeQuery();
+   			if (rs.next()) {
+   				System.out.print(rs.getString("id"));
+   				return false;
+   			}
+
+   			// Step 3: Execute the query or update query
+   			int count = preparedStatement.executeUpdate();
+   			System.out.println(count);
+   			return count > 0;
+   		} catch (SQLException e) {
+   			System.out.println("Unable to connect to database");
+   			e.printStackTrace();
+   			System.exit(1);
+   			// print SQL exception information
+   			return false;
+   		}
+	}
+    
+   //Login -- add to db (done)
+    public static String Login(String email,String password) {
+    	String FIND_USERS_SQL = "SELECT * FROM public.\"users\" where (email = ? or username = ?) and password = ? and lock = FALSE";
+        String ADD_TO_LOGS_SQL = "INSERT INTO logs (username, logdate) VALUES (?, ?)";
+    	try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+   			 // Step 2:Create a statement using connection object
+   			 PreparedStatement preparedStatement = connection.prepareStatement(FIND_USERS_SQL);
+                PreparedStatement preparedStatement1 = connection.prepareStatement(ADD_TO_LOGS_SQL)) {
+   			preparedStatement.setString(1, email);
+   			preparedStatement.setString(2, email);
+   			preparedStatement.setString(3, password);
+
+   			// Step 3: Execute the query or update query
+   			ResultSet rs = preparedStatement.executeQuery();
+   			if (rs.next()) {
+                ZoneId utc = ZoneId.of("UTC+7");
+                ZonedDateTime curDate = ZonedDateTime.now(utc);
+                LocalDateTime localDateTime = curDate.toLocalDateTime();
+                Timestamp timestamp = Timestamp.valueOf(localDateTime);
+
+               preparedStatement1.setString(1, rs.getString("username"));
+               preparedStatement1.setTimestamp(2, timestamp);
+               int rowsAffected = preparedStatement1.executeUpdate();
+               String isAdmin = rs.getBoolean("isAdmin") ? "true" : "false";
+   			   return rs.getString("id") + "|" +  rs.getString("username")+"|"+rs.getString("fullname") + "|" +  rs.getString("email")+ "|" + isAdmin;   				
+   			}
+   			return "";
+   		} catch (SQLException e) {
+   			System.out.println("Unable to connect to database");
+   			e.printStackTrace();
+   			System.exit(1);
+   			// print SQL exception information
+   			return "";
+   		}
     }
 }

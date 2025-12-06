@@ -90,7 +90,6 @@ public class Server {
             while (true) {
                 socketOfServer = listener.accept();
                 //ID là client Number nhớ thay đổi tham số 2 của serverThread
-//                id += newKey++;
                 id += newKey++;
                 ServerThread serverThread = new ServerThread(socketOfServer, id);
                 serverThreadBus.add(serverThread);

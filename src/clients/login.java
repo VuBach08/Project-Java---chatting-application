@@ -22,7 +22,7 @@ public class login extends JPanel {
 	private JTextField email;
 	private JPasswordField password;
 	private Application parent;
-	private JButton btnLoginStatus;
+
 	/**
 	 * Create the application.
 	 */
@@ -53,7 +53,7 @@ public class login extends JPanel {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 		JPanel panel_1 = new JPanel();
-		panel_1.setBackground(new Color(192, 192, 192));
+		panel_1.setBackground(new Color(128, 128, 128));
 		add(panel_1);
 		panel_1.setLayout(null);
 
@@ -101,6 +101,8 @@ public class login extends JPanel {
 
 					User user = new User(email.getText(),hashedPW);
 					//String _id = user.LogIn();
+                    System.out.println("Login success for user ID: " + email.getText() + " " + hashedPW);
+
 					try {
 						parent.write("Login|"+email.getText()+"|"+hashedPW);
 					}catch (IOException ex) {
@@ -154,21 +156,5 @@ public class login extends JPanel {
 		setBounds(100, 100, 605, 476);
 //		frmLogin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	public void showLoginSuccess() {
-	    JOptionPane.showMessageDialog(
-	        this,
-	        "Login successful!\nWelcome back to the app!",
-	        "Login Success",
-	        JOptionPane.INFORMATION_MESSAGE
-	    );
-	}
-
-	public void showLoginFailed() {
-	    JOptionPane.showMessageDialog(
-	        this,
-	        "Wrong username/email or password!\nPlease try again.",
-	        "Login Failed",
-	        JOptionPane.ERROR_MESSAGE
-	    );
-	}
+	
 }

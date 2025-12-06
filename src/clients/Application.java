@@ -2,6 +2,7 @@ package clients;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Image;
 import java.io.BufferedReader;
@@ -12,6 +13,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.swing.SwingUtilities;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -41,101 +43,99 @@ public class Application {
     
     public void setUpSocket() {
         try {
-            thread = new Thread() {
-                @Override
-                public void run() {
+        	thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                	socketOfClient = new Socket("127.0.0.1", 7777);
+                    System.out.println("Successfully Connected!");
+                    // Tạo luồng đầu ra tại client (Gửi dữ liệu tới server)
+                    os = new BufferedWriter(new OutputStreamWriter(socketOfClient.getOutputStream()));
+                    // Luồng đầu vào tại Client (Nhận dữ liệu từ server).
+                    is = new BufferedReader(new InputStreamReader(socketOfClient.getInputStream()));
+                    String message;
+                    while (!isClosed) {
+                        message = is.readLine();
+                        System.out.println("cmd:"+" "+message);
+                        String[] dataSplit = message.split("\\|");
 
-                    try {
-                        socketOfClient = new Socket("127.0.0.1", 7777);
-                        System.out.println("Successfully Connected!");
-                        // Tạo luồng đầu ra tại client (Gửi dữ liệu tới server)
-                        os = new BufferedWriter(new OutputStreamWriter(socketOfClient.getOutputStream()));
-                        // Luồng đầu vào tại Client (Nhận dữ liệu từ server).
-                        is = new BufferedReader(new InputStreamReader(socketOfClient.getInputStream()));
-                        while (!isClosed) {
-                            try {
-                                String message = is.readLine();
-                                if (message == null) {
-                                    break;
-                                }
-                                System.out.println("Server: " + message);
-
-                                // Xử lý đăng nhập thành công
-                                if (message.startsWith("Login_Success")) {
-                                    java.awt.Component[] components = applicationFrame.getContentPane().getComponents();
-                                    for (java.awt.Component comp : components) {
-                                        if (comp instanceof login) {
-                                            ((login) comp).showLoginSuccess();
-                                            break;
-                                        }
-                                    }
-                                }
-                                // Xử lý đăng nhập thất bại
-                                else if (message.startsWith("Login_Failed")) {
-                                    java.awt.Component[] components = applicationFrame.getContentPane().getComponents();
-                                    for (java.awt.Component comp : components) {
-                                        if (comp instanceof login) {
-                                            ((login) comp).showLoginFailed();
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                // Sau này bạn sẽ thêm xử lý chat, online list, v.v. ở đây
-
-                            } catch (IOException e) {
-                                isClosed = true;
-                                System.out.println("Mất kết nối với server!");
-                                JOptionPane.showMessageDialog(applicationFrame, "Mất kết nối tới server!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-                                break;
-                            }
+                        if (message == null) {
+                            break;
                         }
-                        os.close();
-                        is.close();
-                        socketOfClient.close();
-                        } catch (UnknownHostException e) {
-                        	isClosed = true;
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        //Setup send ID
+                        if(dataSplit[0].equals("id")) {
+                        	id = dataSplit[1];
+                        	System.out.println(id);
                         }
+           
+                        if(dataSplit[0].equals("Login_Success")) {
+                        	
+                        	currentUser = new User(dataSplit[1],dataSplit[2],dataSplit[3],dataSplit[4],dataSplit[5].equals("true") ? true:false);
+                        	onlineUsers onlList = new onlineUsers(app, currentUser);
+                        	friends flist = new friends(app,currentUser);
+							chatting c = new chatting(app);
+							globalChatHistory gbc = new globalChatHistory(app);
+							ClearTab();
+							boolean isAdmin = dataSplit[5].equals("true");
+							if (isAdmin) {
+								ChangeTab(new Admin_demo(app), 1000, 1300);
+							} else {
+								try {
+									write("Online|"+ currentUser.getId());
+								}catch (IOException ex) {
+									System.out.println("An error occurred");
+									ex.printStackTrace();
+								}
+								applicationFrame.setLayout(new BorderLayout());
+								ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
+							}
+                        }else if(dataSplit[0].equals("LoginFailed")) {
+                        	JOptionPane.showMessageDialog(applicationFrame, "User got locked or entered the wrong password");
+                        }else if(dataSplit[0].equals("Reset_password")){
+                        	JOptionPane.showMessageDialog(applicationFrame,"Please Check your email");
+                    	}else if(dataSplit[0].equals("Reset_password")){
+                        	JOptionPane.showMessageDialog(applicationFrame,"Please Check your email");
+                    	}
+                        else if(dataSplit[0].equals("Register_Success")) {
+                        	System.out.print("Register_Success");
+                        	JOptionPane.showMessageDialog(applicationFrame, "You are successfully registered, you will be redirected to the login page shortly");
+                        	ClearTab();
+                        	ChangeTab(new login(app),605, 476);
+                        }    
                     }
-                };
+                    os.close();
+                    is.close();
+                    socketOfClient.close();
+                }
+	                catch (UnknownHostException e) {
+	                	isClosed = true;
+	                    e.printStackTrace();
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                }
+            	}
+        	};
 
-                thread.run();
-            } catch (Exception e) {
-            	isClosed = true;
-            }
+            thread.run();
+        } catch (Exception e) {
+        	isClosed = true;
         }
-
+    }
+    
 
     public Application() {
         try {
         	applicationFrame = new JFrame();
-        	
         	Image icon = new ImageIcon(getClass().getResource("/icons/discord.png")).getImage();
             applicationFrame.setIconImage(icon);
-        	User currentUser = null;
-        	onlineUsers onlList = new onlineUsers(app, currentUser);
-        	friends flist = new friends(app,currentUser);
-			chatting c = new chatting(app);
-			globalChatHistory gbc = new globalChatHistory(app);
-			ClearTab();
-			boolean isAdmin = false;
-			if (isAdmin) {
-				ChangeTab(new Admin_demo(app), 1000, 1300);
-			} else {
-			
-//				applicationFrame.getContentPane().setLayout(new BorderLayout());
-//				ChangeTab(new home(app,applicationFrame,onlList, flist, c, gbc),600, 600);
-			}
+        	applicationFrame.add(new register(this));
         	Application.app = this;
-        	applicationFrame.add(new login(this));
             applicationFrame.setForeground(Color.BLACK);
-            applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
+            applicationFrame.setTitle("Login");
+            applicationFrame.setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);
             applicationFrame.setBackground(Color.WHITE);
-            applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
+            applicationFrame.getContentPane().setFont(new Font("Source Code Pro Medium", Font.PLAIN, 11));
             applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
         	applicationFrame.setBounds(100, 100, 605, 476);
             applicationFrame.setVisible(true);

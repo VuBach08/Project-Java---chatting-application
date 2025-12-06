@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.swing.JOptionPane;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -84,23 +85,24 @@ public class register extends JPanel {
 	    btnNewButton.addActionListener(new ActionListener() {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
-				if(name.getText() != "" && password.getText() != "" && email.getText() != "") {
-					String id = UUID.randomUUID().toString();
-					String hashedPW = User.hashPassword(password.getText());
+	            if (name.getText().isEmpty() || password.getText().isEmpty() || email.getText().isEmpty()) {
+	                JOptionPane.showMessageDialog(register.this, "Please fill in all fields!", "Error", JOptionPane.ERROR_MESSAGE);
+	                return;
+	            }
 
-					if (hashedPW == null) hashedPW = password.getText();
-					System.out.println("Register|"+id+"|"+name.getText()+"|"+fullname.getText()+"|"+email.getText()+"|"+hashedPW);
+	            String id = UUID.randomUUID().toString();
+	            String hashedPW = User.hashPassword(password.getText());
+	            if (hashedPW == null) hashedPW = password.getText();
 
-					try {
-						parent.write("Register|"+id+"|"+name.getText()+"|"+fullname.getText()+"|"+email.getText()+"|"+hashedPW);
-					}catch (IOException ex) {
-						System.out.println("An error occurred");
-						ex.printStackTrace();
-					}
-
-				}
-			}
-		});
+	            try {
+	                parent.write("Register|" + id + "|" + name.getText() + "|" + fullname.getText() + "|" + email.getText() + "|" + hashedPW);
+	                // Don't switch yet — wait for server response!
+	            } catch (IOException ex) {
+	                JOptionPane.showMessageDialog(register.this, "Connection error!", "Error", JOptionPane.ERROR_MESSAGE);
+	                ex.printStackTrace();
+	            }
+	        }
+	    });
 	    btnNewButton.setForeground(Color.WHITE);
 	    btnNewButton.setBackground(new Color(32, 178, 170));
 	    btnNewButton.setFont(new Font("Comic Sans MS", Font.BOLD, 11));

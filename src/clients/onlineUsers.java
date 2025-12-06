@@ -136,4 +136,23 @@ public class onlineUsers extends JPanel {
         this.add(usersAndgroupsPanel, BorderLayout.CENTER);
         this.add(searchBar, BorderLayout.AFTER_LAST_LINE);
     }
+    public void ClearChat() {
+        sideList.clear();
+    }
+    
+    public void UpdateList(User user) {
+
+        //we can dynamically add users/groups here
+        int i = 0;
+        for (int j = 0; j < user.friends.size(); ++i, ++j) {
+            sideList.addElement(user.friends.get(j));
+            System.out.println("call _ user onlinelist " + user.friends.size());
+        }
+
+        for (int j = 0; j < user.getGroupList().size(); ++i, ++j) {
+            sideList.add(i, user.getGroupList().get(j));
+        }
+
+        System.out.println("end user list");
+    }
 }

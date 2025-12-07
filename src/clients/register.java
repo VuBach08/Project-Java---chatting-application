@@ -37,9 +37,9 @@ public class register extends JPanel {
 
 	private void initialize() {
 	    setForeground(Color.BLACK);
-	    setFont(new Font("Comics San MS", Font.PLAIN, 12));
+	    setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
 	    setBackground(Color.WHITE);
-	    setFont(new Font("Comics San MS", Font.PLAIN, 11));
+	    setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
 	    JPanel panel_1 = new JPanel();
@@ -55,7 +55,7 @@ public class register extends JPanel {
 	    panel_1.add(lblNewLabel);
 
 	    email = new JTextField();
-	    email.setFont(new Font("Comics San MS", Font.PLAIN, 11));
+	    email.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    email.setPreferredSize(new Dimension(7, 22));
 	    email.setBounds(201, 216, 202, 28);
 	    panel_1.add(email);
@@ -68,7 +68,7 @@ public class register extends JPanel {
 	    panel_1.add(lblNewLabel_1);
 
 	    password = new JPasswordField();
-	    password.setFont(new Font("Comics San MS", Font.PLAIN, 11));
+	    password.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    password.setPreferredSize(new Dimension(7, 22));
 	    password.setColumns(10);
 	    password.setBounds(201, 276, 202, 28);
@@ -125,7 +125,7 @@ public class register extends JPanel {
 	    panel_1.add(btnLogin);
 
 	    name = new JTextField();
-	    name.setFont(new Font("Comics San MS", Font.PLAIN, 11));
+	    name.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    name.setPreferredSize(new Dimension(7, 22));
 	    name.setColumns(10);
 	    name.setBounds(201, 161, 202, 28);
@@ -147,7 +147,7 @@ public class register extends JPanel {
 
 	    fullname = new JTextField();
 	    fullname.setPreferredSize(new Dimension(7, 22));
-	    fullname.setFont(new Font("Comics San MS", Font.PLAIN, 11));
+	    fullname.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    fullname.setColumns(10);
 	    fullname.setBounds(201, 101, 202, 28);
 	    panel_1.add(fullname);

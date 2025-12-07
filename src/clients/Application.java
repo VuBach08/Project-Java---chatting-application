@@ -105,7 +105,6 @@ public class Application {
                         		home home = (home) mainPanel;
                         		onlineUsers olUsers  = (onlineUsers)home.userPanel;
                         		friends flist  = (friends)home.friendsList;
-                        		
                         		currentUser.friends.clear();
                         		currentUser.groupList.clear();
                         		String[] current = message.split("\\|\\|");
@@ -140,7 +139,45 @@ public class Application {
                         		flist.ClearList();
                         		flist.UpdateList(currentUser);
                         	}
-                        }else if(dataSplit[0].equals("AddFriendSuccess")) {
+                        }else if(dataSplit[0].equals("MessageData")) {
+
+                        	System.out.println("call in MessageData");
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		chatting chatting  = (chatting)home.chatPanel;
+                        		//chatting.ClearChat();
+                        		String[] chatSplit = message.split("\\|\\|");
+                        		String[] messageStrings = chatSplit[1].split("\\|");
+                        		chatting.isGroup = false;
+                        		chatting.information.setVisible(false);
+                        		for (String messageString : messageStrings) {
+                        			String msg = messageString.replace(app.focusIDString +" -","("+app.focusNameString+")")
+                        					.replace(app.currentUser.getId() +" -","("+app.currentUser.fullname+")");
+                        			chatting.AddChat(messageString);
+                        		}
+                        	}
+                        }else if(dataSplit[0].equals("SendToUser")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		chatting chatting  = (chatting)home.chatPanel;
+
+                        		onlineUsers olOnlineUsers  = (onlineUsers)home.userPanel;
+                        		olOnlineUsers.ClearChat();
+
+                        		currentUser.updateFriend(dataSplit[1]);
+                        		olOnlineUsers.UpdateList(currentUser);
+                        		System.out.println(dataSplit[1] + " " + app.focusIDString);
+
+                        	}
+                        }else if(dataSplit[0].equals("UpdateMessage")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		chatting chatting  = (chatting)home.chatPanel;
+                        		if(dataSplit[1].equals(app.focusIDString)) {
+                        			chatting.AddChat(dataSplit[2]);
+                        		}
+                        	}
+                    	}else if(dataSplit[0].equals("AddFriendSuccess")) {
                         	JOptionPane.showMessageDialog(mainPanel, "You just added new friend to the friends list");
                         }
                     }
@@ -173,10 +210,10 @@ public class Application {
         	Application.app = this;
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setTitle("Login");
-            applicationFrame.setFont(new Font("Source Code Pro Light", Font.PLAIN, 12));
+            applicationFrame.setFont(new Font("Comics San MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);
             applicationFrame.setBackground(Color.WHITE);
-            applicationFrame.getContentPane().setFont(new Font("Source Code Pro Medium", Font.PLAIN, 11));
+            applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
             applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
         	applicationFrame.setBounds(100, 100, 605, 476);
             applicationFrame.setVisible(true);

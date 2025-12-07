@@ -109,19 +109,56 @@ public class ServerThread implements Runnable {
                 }
                 else if(commandString.equals("Login")) {
                     String result = userRepo.Login(messageSplit[1], messageSplit[2]);
+                    System.out.println(result);
                     
                     if(!result.equals("")) {
-                        String[] info = result.split("\\|");
-                        actual_userID = info[0];
-                        this.userID = actual_userID; // Cập nhật đúng userID trong bus
-                        System.out.println("Login success for user ID: " + actual_userID);
-                        write("Login_Success|" + result);           // Gửi thành công
+                    	actual_userID = result.split("\\|")[0];
+                		Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1],"Login_Success|"+result);
+                		if (result.split("\\|")[4].equals("false")) {
+                            String onlineList = GetListFriendsAndGroups(actual_userID);
+                            Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "OnlineList"+onlineList);
+                        }
                        
-                    } else {
-                    	System.out.println("Login failed for user ID: " + actual_userID);
-                        write("Login_Failed|");                        // Gửi thất bại
-                        System.out.println("Login failed for: " + messageSplit[1]);
+                    }else {
+                		Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1],"LoginFailed");
+                	}
+                }else if(commandString.equals("OnlineList")) {
+                	String onlineList = GetListFriendsAndGroups(messageSplit[1]);
+                	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "OnlineList"+onlineList);
+                }else if (commandString.equals("MessageData")) {
+                	if(messageSplit[1].equals("user")) {
+	                    String id1 = messageSplit[2];//Người gửi
+	                    String id2 = messageSplit[3];//Từ user
+	                    String[] mess = GetMessage(id1+"|"+ id2);
+	                    if(!mess[0].equals("")) {
+	                    	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "MessageData|"+mess[0]+"||"+mess[1]);
+	                    }
+                    }else if(messageSplit[1].equals("group")) {
+                    	String id = messageSplit[2];//Người gửi
+	                    String[] mess = GetGroup(id);
+	                    if(!mess[0].equals("")) {
+	                    	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GroupData|"+mess[0]+"|||"+mess[1] +"|" + mess[2]);
+	                    }
                     }
+                }else if (commandString.equals("DirectMessage")) {
+                    String id1 = messageSplit[1];//Người gửi
+                    String id2 = messageSplit[2];//Từ user
+                    String content = messageSplit[3];
+                    String[] mess = CheckMessageExists(id1, id2);
+                    if (!mess[0].equals("")) {
+                        ServerThread.UpdateExistsMessage(id1, id2, content);
+                    } else {
+                        ServerThread.InsertMessage(id1, id2, content);
+                    }
+
+                    Server.serverThreadBus.boardCastUser(id2, "SendToUser|" + id1 + "|" + content);
+                }else if (commandString.equals("Online")) {
+                    String id = messageSplit[1];//Từ user
+                    SetOnline(id);
+                } else if (commandString.equals("Offline")) {
+                    System.out.println("Offline");
+                    String id = messageSplit[1];//Từ user
+                    SetOffline(id);
                 }else if (commandString.equals("AddFriend")) {
                     String id1 = messageSplit[1];//From
                     String id2 = messageSplit[2];//To
@@ -152,82 +189,285 @@ public class ServerThread implements Runnable {
         os.flush();
     }
     
-    public static boolean Register(String id,String name,String fullname,String email,String password) {
-    	String INSERT_USERS_SQL = "INSERT INTO public.\"users\" (id, username,fullname, email, password, \"createAt\") values (?,?,?,?,?,?)";
-    	String USER_EXIST = "SELECT * FROM public.\"users\" where email = ? or username = ?";
-    	try (Connection connection = DriverManager.getConnection(URL, USER, PW);
-   			 PreparedStatement stmt = connection.prepareStatement(USER_EXIST);
-   			 // Step 2:Create a statement using connection object
-   			 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
+    public static String GetListFriendsAndGroups(String id) {
+    	String FIND_ONLINE_FRIENDS = "SELECT u2.id, u2.fullname, u2.lock, u2.\"isOnline\" ,u2.blocks FROM public.\"users\" u JOIN public.\"users\" u2 "
+    			+ "ON u2.id = ANY (u.friends) where u.id = ? and ( not(u2.id = ANY(u.blocks)) OR u.blocks is null)";
+    	
+    	String FIND_GROUPS = "SELECT groupid,groupname FROM public.\"groups\" where ? = any(users)";
+    	
+    	try (Connection connection = DriverManager.getConnection(URL, USER, PW)) {
+			PreparedStatement online = connection.prepareStatement(FIND_ONLINE_FRIENDS);
+			PreparedStatement group = connection.prepareStatement(FIND_GROUPS);
+			
+			online.setString(1,id);
+			group.setString(1,id);
+			
+			ResultSet friendList = online.executeQuery();
+			ResultSet groupList = group.executeQuery();
+			
+			String friendString = new String("");
+			while (friendList.next())
+			{
+				String _id = friendList.getString("id");
+				boolean isOnline = friendList.getBoolean("isOnline");
+				String _name = friendList.getString("fullname");
+
+				friendString += "||"+"user"+"|"+_id +"|"+ _name + "|"+isOnline;
+				System.out.print(friendString);
+			}
+			while (groupList.next()) {
+				String groupid = groupList.getString("groupid");
+				String groupname = groupList.getString("groupname");
+				
+				friendString += "||"+"group"+"|"+groupid +"|"+ groupname;
+			}
+			return friendString;
+
+		} catch (SQLException sqlException) {
+			System.out.println("Unable to connect to database");
+			sqlException.printStackTrace();
+			return "";
+		}
+    }
+    
+  //Get Message Data
+    public static String[] GetMessage(String id) {
+        String FIND_MESSAGE_SQL = "SELECT \"idChat\",content FROM public.\"messages\" where \"idChat\" = ?";
+        String GET_USER1_SQL = "SELECT username FROM users WHERE id = ?";
+        String GET_USER2_SQL = "SELECT username FROM users WHERE id = ?";
+
+        String[] result = new String[2];
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_MESSAGE_SQL);
+             PreparedStatement preparedStatement1 = connection.prepareStatement(GET_USER1_SQL);
+             PreparedStatement preparedStatement2 = connection.prepareStatement(GET_USER2_SQL)) {
+            preparedStatement.setString(1, id);
+
+            ResultSet rs = preparedStatement.executeQuery();
+
+            if (rs.next()) {
+            	Array  arr =  rs.getArray("content");
+                result[0] = rs.getString("idChat");
+
+                result[1] = "";
+                String[] m = (String[]) arr.getArray();
+                for(int i = 0;i<m.length;++i) {
+                	if(i == m.length-1)
+                		result[1] += m[i];
+                	else
+                		result[1] += m[i] + "|";
+                }
+                System.out.println("TESTING");
+                System.out.println(result[0]);
+                System.out.println("DONE TESTING");
+
+                String[] getAllId = result[0].split("\\|");
+
+                preparedStatement1.setString(1, getAllId[0]);
+                preparedStatement2.setString(1, getAllId[1]);
+
+                ResultSet resultSet = preparedStatement1.executeQuery();
+                ResultSet resultSet1 = preparedStatement2.executeQuery();
+                String username1 = "";
+                String username2 = "";
+                if (resultSet.next() && resultSet1.next()) {
+                    username1 = resultSet.getString("username");
+                    username2 = resultSet1.getString("username");
+                }
+
+                System.out.println(username1 + " " + username2);
+
+                result[1] = result[1].replace(getAllId[0] + " -", "(" + username1 + ")");
+                result[1] = result[1].replace(getAllId[1] + " -", "(" + username2 + ")");
+
+
+            } else {
+                result[0] = "";
+                result[1] ="";
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return result;
+        }
+    }
+    
+    public static String[] GetGroup(String id) {
+        String FIND_MESSAGE_SQL = "SELECT groupid,content FROM public.\"groups\" where groupid = ?";
+        String FIND_MEMBER_SQL = "SELECT u.id,u.fullname,CASE WHEN u.id = ANY(mbs.admin) "
+        		+ "THEN CAST(TRUE AS BOOL) ELSE CAST(FALSE AS BOOL) END as isAdmin FROM (SELECT unnest(users) as id, admin FROM public.\"groups\" where groupid = ?) as mbs "
+        		+ " JOIN public.\"users\" u on mbs.id = u.id";
+        String[] result = new String[3];
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+        		PreparedStatement smt1 = connection.prepareStatement(FIND_MEMBER_SQL);
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_MESSAGE_SQL)) {
+           
+        	preparedStatement.setString(1, id);
+            smt1.setString(1, id);
+            
+            ResultSet rs = preparedStatement.executeQuery();
+            ResultSet rs1 = smt1.executeQuery();
+            
+            if (rs.next()) {
+            	Array  arr =  rs.getArray("content");
+                result[0] = rs.getString("groupid");
+                String[] m = (String[]) arr.getArray();
+                
+                result[1] = "";
+                
+                for(int i = 0;i<m.length;++i) {
+                	if(i == m.length-1)
+                		result[1] += m[i];
+                	else
+                		result[1] += m[i] + "|";
+                }
+                System.out.println(result[1]);
+                
+            } else {
+                result[0] = "";
+                result[1] ="";
+            }
+            result[2] = "";
+            while(rs1.next()) {
+            	String _id =  rs1.getString("id");
+            	String name =  rs1.getString("fullname");
+            	String isAdmin =  rs1.getBoolean("isAdmin") ? "true" : "false";
+            	result[2] += "||"+  _id+ "|" + name + "|" + isAdmin;
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return result;
+        }
+    }
+    
+    public static String[] CheckMessageExists(String id, String id2) {
+        String FIND_MESSAGE_SQL = "SELECT \"idChat\",content FROM public.\"messages\" where \"idChat\" = ? or \"idChat\" = ?";
+        String idChat1 = id + "|" + id2;
+        String idChat2 = id2 + "|" + id;
+        String[] result = new String[2];
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_MESSAGE_SQL)) {
+            preparedStatement.setString(1, idChat1);
+            preparedStatement.setString(2, idChat2);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                result[0] = rs.getString("idChat");
+                result[1] = rs.getArray("content").toString();
+            } else {
+                result[0] = "";
+            }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return result;
+        }
+    }
+    
+    public static boolean UpdateExistsMessage(String id, String id2, String content) {
+        String idChat1 = id + "|" + id2;
+        String idChat2 = id2 + "|" + id;
+        String UPDATE_MESSAGE_SQL = "Update public.\"messages\" SET content =array_append(content,?) WHERE \"idChat\" = ? or \"idChat\" = ?";
+        String ADD_TO_SYSTEMS_SQL = "INSERT INTO systems (username, type, \"idChat\", time) VALUES (?, ?, ?, ?)";
+        String GET_USER_SQL = "SELECT username FROM users WHERE id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MESSAGE_SQL);
+             PreparedStatement preparedStatement1 = connection.prepareStatement(GET_USER_SQL);
+             PreparedStatement preparedStatement2 = connection.prepareStatement(ADD_TO_SYSTEMS_SQL)) {
+            preparedStatement.setString(1, content);
+            preparedStatement.setString(2, idChat1);
+            preparedStatement.setString(3, idChat2);
+
+            preparedStatement1.setString(1, id);
+            ResultSet resultSet = preparedStatement1.executeQuery();
+            String usernameToAdd = "";
+
+            if (resultSet.next()) {
+                usernameToAdd = resultSet.getString("username");
+            }
+
             ZoneId utc = ZoneId.of("UTC+7");
             ZonedDateTime curDate = ZonedDateTime.now(utc);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String formattedDate = curDate.format(formatter);
-            Date sqlDate = Date.valueOf(formattedDate);
+            LocalDateTime localDateTime = curDate.toLocalDateTime();
+            Timestamp timestamp = Timestamp.valueOf(localDateTime);
 
-   			preparedStatement.setString(1, id);
-   			preparedStatement.setString(2, name);
-   			preparedStatement.setString(3, fullname);
-   			preparedStatement.setString(4, email);
-   			preparedStatement.setString(5, password);
-            preparedStatement.setDate(6, sqlDate);
-            System.out.println(preparedStatement);
-   			stmt.setString(1, email);
-   			stmt.setString(2, name );
-   			ResultSet rs = stmt.executeQuery();
-   			if (rs.next()) {
-   				System.out.print(rs.getString("id"));
-   				return false;
-   			}
+            preparedStatement2.setString(1, usernameToAdd);
+            preparedStatement2.setInt(2, 1);
+            preparedStatement2.setString(3, idChat1);
+            preparedStatement2.setTimestamp(4, timestamp);
 
-   			// Step 3: Execute the query or update query
-   			int count = preparedStatement.executeUpdate();
-   			System.out.println(count);
-   			return count > 0;
-   		} catch (SQLException e) {
-   			System.out.println("Unable to connect to database");
-   			e.printStackTrace();
-   			System.exit(1);
-   			// print SQL exception information
-   			return false;
-   		}
-	}
-    
-   //Login -- add to db (done)
-    public static String Login(String email,String password) {
-    	String FIND_USERS_SQL = "SELECT * FROM public.\"users\" where (email = ? or username = ?) and password = ? and lock = FALSE";
-        String ADD_TO_LOGS_SQL = "INSERT INTO logs (username, logdate) VALUES (?, ?)";
-    	try (Connection connection = DriverManager.getConnection(URL, USER, PW);
-   			 // Step 2:Create a statement using connection object
-   			 PreparedStatement preparedStatement = connection.prepareStatement(FIND_USERS_SQL);
-                PreparedStatement preparedStatement1 = connection.prepareStatement(ADD_TO_LOGS_SQL)) {
-   			preparedStatement.setString(1, email);
-   			preparedStatement.setString(2, email);
-   			preparedStatement.setString(3, password);
+            int rowsAffected = preparedStatement2.executeUpdate();
 
-   			// Step 3: Execute the query or update query
-   			ResultSet rs = preparedStatement.executeQuery();
-   			if (rs.next()) {
-                ZoneId utc = ZoneId.of("UTC+7");
-                ZonedDateTime curDate = ZonedDateTime.now(utc);
-                LocalDateTime localDateTime = curDate.toLocalDateTime();
-                Timestamp timestamp = Timestamp.valueOf(localDateTime);
+            int count = preparedStatement.executeUpdate();
 
-               preparedStatement1.setString(1, rs.getString("username"));
-               preparedStatement1.setTimestamp(2, timestamp);
-               int rowsAffected = preparedStatement1.executeUpdate();
-               String isAdmin = rs.getBoolean("isAdmin") ? "true" : "false";
-   			   return rs.getString("id") + "|" +  rs.getString("username")+"|"+rs.getString("fullname") + "|" +  rs.getString("email")+ "|" + isAdmin;   				
-   			}
-   			return "";
-   		} catch (SQLException e) {
-   			System.out.println("Unable to connect to database");
-   			e.printStackTrace();
-   			System.exit(1);
-   			// print SQL exception information
-   			return "";
-   		}
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
     }
+    
+ // -- add to db (done)
+    public static boolean InsertMessage(String id, String id2, String content) {
+        String idChat1 = id + "|" + id2;
+        String idChat2 = id2 + "|" + id;
+        String INSERT_MESSAGE_SQL = "INSERT INTO public.\"messages\" (\"idChat\",users,content) values (?,?,?)";
+        String GET_IDCHAT_SQL = "SELECT \"idChat\" FROM messages WHERE users && ?";
+        String GET_USERNAME_SQL = "SELECT fullname FROM users WHERE id = ?";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_MESSAGE_SQL);
+             PreparedStatement preparedStatement1 = connection.prepareStatement(INSERT_MESSAGE_SQL);
+             PreparedStatement preparedStatement2 = connection.prepareStatement(GET_IDCHAT_SQL);
+             PreparedStatement preparedStatement3 = connection.prepareStatement(GET_USERNAME_SQL);
+             ) {
+            String[] contents = new String[1];
+            contents[0] = content;
+            Array array = connection.createArrayOf("TEXT", contents);
+
+            String[] users = new String[2];
+            users[0] = id;
+            users[1] = id2;
+            Array u = connection.createArrayOf("TEXT", users);
+            preparedStatement.setString(1, idChat1);
+            preparedStatement.setArray(2, u);
+            preparedStatement.setArray(3, array);
+
+            preparedStatement1.setString(1, idChat2);
+            preparedStatement1.setArray(2, u);
+            preparedStatement1.setArray(3, array);
+
+            preparedStatement2.setArray(1, u);
+            preparedStatement3.setString(1, id);
+
+            ResultSet resultSet = preparedStatement2.executeQuery();
+            ResultSet resultSet1 = preparedStatement3.executeQuery();
+            String username = "";
+            String idChat = "";
+            if (resultSet.next()) {
+                idChat = resultSet.getString("idChat");
+            }
+            if (resultSet1.next()) {
+                username = resultSet1.getString("fullname");
+            }
+
+            int count = preparedStatement.executeUpdate();
+            int count2 = preparedStatement1.executeUpdate();
+            return count > 0 && count2 > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+    
     public static String AddFriend(String userId, String FriendName) {
         String ADD_FRIEND_SQL = "UPDATE public.\"users\" SET friends = array_append(friends,?)"
                 + "WHERE id =? and exists (select * from public.\"users\" where id = ?)";
@@ -260,6 +500,86 @@ public class ServerThread implements Runnable {
             e.printStackTrace();
             System.exit(1);
             return "";
+        }
+    }
+    
+    public static String GetFriendList(String id) {
+        String GET_FRIEND_LIST_SQL = "select p.id,p.fullname from public.\"users\" u join public.\"users\" "
+                + "p on p.id = any(u.friends) where u.id = ? group by p.id,u.fullname,u.id";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(GET_FRIEND_LIST_SQL)) {
+            preparedStatement.setString(1, id);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            String tempString ="";
+            while (rs.next()) {
+                tempString += "||"+ rs.getString("id") + "|" + rs.getString("fullname");
+            }
+            return tempString;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return "";
+        }
+    }
+    
+    //SET ONLINE
+    public static boolean SetOnline(String id) {
+        String SET_ONLINE_SQL = "UPDATE public.\"users\" SET \"isOnline\" = true where id = ?";
+        String GET_FRIEND_SQL = "SELECT friends from public.\"users\" where id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(SET_ONLINE_SQL);
+        		PreparedStatement preparedStatement1 = connection.prepareStatement(GET_FRIEND_SQL)) {
+            preparedStatement.setString(1, id);
+            preparedStatement1.setString(1, id);
+
+            int count = preparedStatement.executeUpdate();
+
+            ResultSet resultSet = preparedStatement1.executeQuery();
+
+            if(resultSet.next()) {
+           	 Array  arr =  resultSet.getArray("friends");
+
+                String[] m = (String[]) arr.getArray();
+                for (String element : m) {
+                	Server.serverThreadBus.boardCastUser(element,"IsOnline|"+id);
+                }
+           }
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+
+    //SET OFFLINE
+    public static boolean SetOffline(String id) {
+    	System.out.println("Offline");
+        String SET_ONLINE_SQL = "UPDATE public.\"users\" SET \"isOnline\" = false where id = ?";
+        String GET_FRIEND_SQL = "SELECT friends from public.\"users\" where id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(SET_ONLINE_SQL);
+        	PreparedStatement preparedStatement1 = connection.prepareStatement(GET_FRIEND_SQL)) {
+            preparedStatement.setString(1, id);
+            preparedStatement1.setString(1, id);
+
+            int count = preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement1.executeQuery();
+            if(resultSet.next()) {
+            	 Array  arr =  resultSet.getArray("friends");
+
+                 String[] m = (String[]) arr.getArray();
+                 for (String element : m) {
+                 	Server.serverThreadBus.boardCastUser(element,"IsOffline|"+id);
+                 }
+            }
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
         }
     }
 }

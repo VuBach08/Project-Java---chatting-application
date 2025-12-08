@@ -40,14 +40,16 @@ public class onlineUsers extends JPanel {
     private JTextField searchBar;
     private JLabel navigation;
     private Application parent;
+    private static final Font BIGGER_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 18);
 
     static class CustomRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             Component renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
+            setFont(BIGGER_FONT);
             if (value instanceof User) {
                 String status = ((User) value).isOnline() ? "online" : "offline";
+                
                 setText(((User) value).getName() + " - Status: " + status);
                 if (((User) value).chatWithU) {
                     setForeground(Color.RED);
@@ -57,7 +59,7 @@ public class onlineUsers extends JPanel {
             }
             if (value instanceof groupChat) {
                 setText("(group) - " + ((groupChat) value).getGroupName());
-                setForeground(Color.PINK);
+                setForeground(Color.WHITE);
             }
 
             return renderer;
@@ -136,7 +138,7 @@ public class onlineUsers extends JPanel {
     }
 
     private void SetPlaceholder(JTextField textField, String placeholder) {
-        textField.setForeground(Color.GRAY);
+        textField.setForeground(new Color(255, 255, 255));
         textField.setText(placeholder);
 
         textField.addFocusListener(new FocusAdapter() {
@@ -162,12 +164,14 @@ public class onlineUsers extends JPanel {
         this.parent = app;
         this.setLayout(new BorderLayout());
         navigation = new JLabel("Welcome, " + user.getName());
+        navigation.setForeground(new Color(255, 255, 255));
         navigation.setFont(new Font("Source Code Pro", Font.BOLD, 14));
         navigation.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding
         navigation.setOpaque(true);
-        navigation.setBackground(Color.LIGHT_GRAY);
+        navigation.setBackground(new Color(128, 128, 128));
 
         searchBar = new JTextField();
+        searchBar.setBackground(new Color(192, 192, 192));
         searchBar.setMargin(new Insets(15, 10, 15, 10));
         searchBar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY), // Border color
@@ -210,6 +214,8 @@ public class onlineUsers extends JPanel {
         }
 
         usersAndgroups = new JList<>(sideList);
+        usersAndgroups.setForeground(new Color(255, 255, 255));
+        usersAndgroups.setBackground(new Color(128, 128, 128));
         usersAndgroups.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         usersAndgroups.setCellRenderer(new CustomRenderer());
         usersAndgroups.addListSelectionListener(new ListSelectionListener() {

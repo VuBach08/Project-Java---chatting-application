@@ -62,7 +62,7 @@ public class home extends JPanel implements ActionListener {
 	    mainContainer = new JPanel(new CardLayout());
 	    mainPanel = new JPanel(new BorderLayout());
 	    mainPanel.setForeground(new Color(255, 255, 255));
-	    mainPanel.setBackground(new Color(128, 128, 128));
+	    mainPanel.setBackground(Color.GRAY);
 
 	    int totalWidth = 600;
 	    int userWidth = (int) (totalWidth * 0.4);

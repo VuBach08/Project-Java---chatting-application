@@ -165,6 +165,11 @@ public class ServerThread implements Runnable {
                     System.out.println("Offline");
                     String id = messageSplit[1];//Từ user
                     SetOffline(id);
+                }else if(commandString.equals("GlobalSearch")) {
+                	String id = messageSplit[1];//người muốn chặn
+                    String content = messageSplit[2];// người chặn
+                	String msg = SearchMessageGlobal(id,content);
+                	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GlobalSearch" + msg);
                 }else if (commandString.equals("AddFriend")) {
                     String id1 = messageSplit[1];//From
                     String id2 = messageSplit[2];//To
@@ -361,6 +366,39 @@ public class ServerThread implements Runnable {
             	String isAdmin =  rs1.getBoolean("isAdmin") ? "true" : "false";
             	result[2] += "||"+  _id+ "|" + name + "|" + isAdmin;
             }
+            return result;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return result;
+        }
+    }
+    
+    public static String SearchMessageGlobal(String idUser,String content) {
+    	String like_content = "%" + content+ "%";
+        String FIND_MESSAGE_SQL = "SELECT * FROM ("
+        		+ "SELECT u.fullname,u.username,u.id,unnest(content) as ct"
+        		+ "	FROM public.messages join public.users u on u.id = any(users)"
+        		+ "	where \"idChat\" like ? and id <> ?"
+        		+ "	) as DT"
+        		+ " WHERE DT.ct like ?";
+        String result = new String("");
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+
+            PreparedStatement preparedStatement = connection.prepareStatement(FIND_MESSAGE_SQL)) {
+            preparedStatement.setString(1, idUser + "|%");
+            preparedStatement.setString(2, idUser);
+            preparedStatement.setString(3, like_content);
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+           
+            while (rs.next()) {
+            	String  name =  rs.getString("fullname");
+                String msgData = rs.getString("ct");
+                String id = rs.getString("id");
+                result += "||" +"user"+ "|" + name +"|" + msgData;
+            } 
+            System.out.println(result);
             return result;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -205,7 +205,23 @@ public class Application {
                         			chatting.AddChat(dataSplit[2]);
                         		}
                         	}
-                    	}else if(dataSplit[0].equals("IsOffline")) {
+                    	}else if(dataSplit[0].equals("GlobalSearch")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		globalChatHistory gbc  = (globalChatHistory) home.chatHistory;
+                        		
+                        		String[] msgStrings = message.split("\\|\\|");
+                        		gbc.ClearResult();
+                        		for(int i = 1;i < msgStrings.length;++i) {
+                        			System.out.println(msgStrings[i]);
+                        			String[] msg = msgStrings[i].split("\\|");
+                        			if(msg[0].equals("user")) {
+                        				String[] mStrings =msg[2].split("-");
+                        				gbc.AddResult("with (" + msg[1] +") " + mStrings[mStrings.length-1]);
+                        			}
+                        		}
+                        	}
+                        }else if(dataSplit[0].equals("IsOffline")) {
                         	System.out.print(dataSplit[1]);
                         	if(mainPanel instanceof home) {
                         		home home = (home) mainPanel;

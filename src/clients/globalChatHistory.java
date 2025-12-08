@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -40,10 +41,25 @@ public class globalChatHistory extends JPanel {
 	    searchBar.setSize(new Dimension(600, 200));
 	    SetPlaceholder(searchBar, "Type A Sentence You Want To Search For");
 
-	    chatDisplay = new JList<>(chatResults);
+	    chatDisplay = new JList<String>(chatResults);
 	    chatDisplay.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
 	    chatDisplay.setBackground(new Color(128, 128, 128));
+        searchBar.addActionListener(e -> {
+            if (e.getSource() == searchBar) {
+                String id = parent.currentUser.getId();
+                String content = searchBar.getText();
 
+                if (!searchBar.getText().equals("") && parent.currentUser != null) {
+                    try {
+                    	parent.write("GlobalSearch|" + id + "|" + content);
+                        searchBar.setText("");
+                    } catch (IOException ex) {
+                        ex.getStackTrace();
+                        System.out.println("Unable to carry out action");
+                    }
+                }
+            }
+        });
 
 	    JPanel displayPanel = new JPanel(new BorderLayout());
 	    displayPanel.setSize(new Dimension(600, 600));

@@ -150,8 +150,14 @@ public class ServerThread implements Runnable {
                     } else {
                         ServerThread.InsertMessage(id1, id2, content);
                     }
-
                     Server.serverThreadBus.boardCastUser(id2, "SendToUser|" + id1 + "|" + content);
+                }else if (commandString.equals("CreateGroup")) {
+                    System.out.println("CreateGroup "+ message);
+                    String[] newDataString = message.split("\\|\\|");
+                    String name = newDataString[1];//Người gửi
+                    String id = newDataString[2];//Từ user
+                    String members = newDataString[3];
+                    InsertGroup(name, id,members);
                 }else if (commandString.equals("Online")) {
                     String id = messageSplit[1];//Từ user
                     SetOnline(id);
@@ -167,6 +173,25 @@ public class ServerThread implements Runnable {
                     	Server.serverThreadBus.boardCastUser(actual_idString, "AddFriendSuccess");
                     	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "AddFriendSuccess");
                     }
+                }else if (commandString.equals("ChangeGroupName")) {
+                    System.out.println("ChangeGroupName");
+                    String groupid = messageSplit[1];
+                    String id = messageSplit[2];
+                    String newName = messageSplit[3];
+                    ChangeGroupName(groupid, id, newName);
+                } else if (commandString.equals("AddMemberToGroup")) {
+                    String groupid = messageSplit[1];
+                    String id = messageSplit[2];
+                    AddMemberToGroup(groupid, id);
+                }else if (commandString.equals("SetAdminGroup")) {
+                    String groupid = messageSplit[1];
+                    String id = messageSplit[2];
+                    SetAdmin(groupid, id);
+                }else if (commandString.equals("GroupChat")) {
+                    System.out.println("GroupChat");
+                    String groupid = messageSplit[1];
+                    String content = messageSplit[2];
+                    UpdateGroupChatMessage(groupid, content);
                 }
             }
         } catch (IOException e) {
@@ -503,6 +528,50 @@ public class ServerThread implements Runnable {
         }
     }
     
+  //CREATE GROUP
+    public static boolean InsertGroup(String group_name, String creator,String users) {
+        String CREATE_GROUP_SQL = "INSERT INTO public.groups "
+                + "	(groupid, admin, groupname, users, content)\r\n"
+                + "	VALUES (?, ?, ?, ?, '{}');";
+        String GET_USER_ID = "SELECT id FROM public.users where username = ? or id = ?";
+        long id = (long) (Math.random() * (10000000000l - 1)) + 1;
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_GROUP_SQL)) {
+            preparedStatement.setString(1, id + "");
+            String[] user = new String[1];
+            String[] memberNames = users.split("\\|");
+            ArrayList<String> members = new ArrayList<>();
+            for (String memberName : memberNames) {
+            	PreparedStatement ps = connection.prepareStatement(GET_USER_ID);
+            	ps.setString(1, memberName);
+            	ps.setString(2, memberName);
+
+            	ResultSet rs =ps.executeQuery();
+            	if(rs.next()) {
+            		String idString = rs.getString("id");
+            		String onlineList = GetListFriendsAndGroups(idString);
+            		Server.serverThreadBus.boardCastUser(idString,"OnlineList"+onlineList);
+            		members.add(idString);
+            	}
+            }
+            user[0] = creator;
+            preparedStatement.setArray(2, connection.createArrayOf("TEXT", user));
+            preparedStatement.setString(3, group_name);
+            preparedStatement.setArray(4, connection.createArrayOf("TEXT", members.toArray()));
+            
+            String onlineList = GetListFriendsAndGroups(creator);
+            Server.serverThreadBus.boardCastUser(creator,"OnlineList"+onlineList);
+            
+            int count = preparedStatement.executeUpdate();
+
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+    
     public static String GetFriendList(String id) {
         String GET_FRIEND_LIST_SQL = "select p.id,p.fullname from public.\"users\" u join public.\"users\" "
                 + "p on p.id = any(u.friends) where u.id = ? group by p.id,u.fullname,u.id";
@@ -575,6 +644,116 @@ public class ServerThread implements Runnable {
                  	Server.serverThreadBus.boardCastUser(element,"IsOffline|"+id);
                  }
             }
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+  //Change Group Name
+    public static boolean ChangeGroupName(String groupID, String adminId, String newName) {
+        String UPDATE_GROUP_NAME_SQL = "UPDATE public.groups"
+                + " SET groupname = ?"
+                + " WHERE groupid = ? and ? = any(admin) ";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_GROUP_NAME_SQL)) {
+            preparedStatement.setString(1, newName);
+            preparedStatement.setString(2, groupID);
+            preparedStatement.setString(3, adminId);
+            System.out.print(preparedStatement);
+            int count = preparedStatement.executeUpdate();
+
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+
+    //Add Member To Group
+    public static boolean AddMemberToGroup(String groupID, String name) {
+        String ADD_MEMBER_SQL = "UPDATE public.\"groups\" SET users = array_append(users,?)"
+                + "WHERE groupid =?";
+        String GET_USER = "SELECT id FROM public.\"users\" WHERE id = ? or username = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(ADD_MEMBER_SQL);
+        		PreparedStatement smt = connection.prepareStatement(GET_USER)) {
+        	smt.setString(1, name);
+        	smt.setString(2, name);
+        	
+        	ResultSet rSet = smt.executeQuery();
+        	if(rSet.next()) {
+        		String memeberid = rSet.getString("id");
+	            preparedStatement.setString(1, memeberid);
+	            preparedStatement.setString(2, groupID);
+	
+	            int count = preparedStatement.executeUpdate();
+	
+	            return count > 0;
+        	}
+        	return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+    
+    //Set admin Group
+    public static boolean SetAdmin(String groupID, String id) {
+        String checkValid = "SELECT * FROM public.\"groups\" where "
+        		+ "? <> any(admin) and groupid = ? and ? = any(users)";
+        String AddAdmin = "UPDATE public.\"groups\" SET admin = array_append(admin,?) "
+        		+ "WHERE groupid =?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(AddAdmin);
+        		PreparedStatement smt = connection.prepareStatement(checkValid)) {
+        	smt.setString(1, id);
+        	smt.setString(2, groupID);
+        	smt.setString(3, id);
+        	
+        	ResultSet rSet = smt.executeQuery();
+        	if(rSet.next()) {
+	            preparedStatement.setString(1, id);
+	            preparedStatement.setString(2, groupID);
+	
+	            int count = preparedStatement.executeUpdate();
+	
+	            return count > 0;
+        	}
+        	return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+  //Send message to group chat
+    public static boolean UpdateGroupChatMessage(String id, String content) {
+        String UPDATE_MESSAGE_SQL = "Update public.\"groups\" SET content = array_append(content,?) WHERE groupid = ?";
+        String GET_MEMBER_MESSAGE_SQL = "SELECT users FROM public.\"groups\" WHERE groupid = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MESSAGE_SQL);
+        		PreparedStatement smt = connection.prepareStatement(GET_MEMBER_MESSAGE_SQL);) {
+            preparedStatement.setString(1, content);
+            preparedStatement.setString(2, id);
+            
+            smt.setString(1, id);
+            
+            ResultSet rsResultSet = smt.executeQuery();
+            if(rsResultSet.next()) {
+            	Array arr =  rsResultSet.getArray("users");
+            	String[] m = (String[]) arr.getArray();
+            	
+            	for (String u:m) {
+                	Server.serverThreadBus.boardCastUser(u, "UpdateMessage|"+id+"|"+content);
+                }
+            }
+            int count = preparedStatement.executeUpdate();
+
             return count > 0;
         } catch (SQLException e) {
             e.printStackTrace();

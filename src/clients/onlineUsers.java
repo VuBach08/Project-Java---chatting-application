@@ -69,6 +69,44 @@ public class onlineUsers extends JPanel {
         JMenuItem spam = new JMenuItem("Report For Spam");
         JMenuItem clearChatHistory = new JMenuItem("Clear Chat History");
 
+        spam.addActionListener(e -> {
+            Object selected = list.getSelectedValue();
+            if (selected != null && selected instanceof User) {
+                User reportedUser = (User) selected;
+                String reportedName = reportedUser.getName();
+                String byUserName = user.getName();
+                try {
+                    parent.write("ReportSpam|" + reportedName + "|" + byUserName);
+                    JOptionPane.showMessageDialog(this, "The user is successfully reported!");
+                    parent.write("BlockAccount|" + user.getId() + "|" + reportedUser.getId());
+                    sideList.removeElement(selected);
+                } catch (IOException ex) {
+                    System.out.println("Unable to write");
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        clearChatHistory.addActionListener(e -> {
+            Object selected = list.getSelectedValue();
+            if (selected != null && selected instanceof User) {
+                User u = (User) selected;
+                // You can perform an action here, e.g., based on the selected item
+
+                int choice = JOptionPane.showConfirmDialog(this, "Would you like to clear all of the chat history? (You cannot undo after this)", "Clear Chat History?", JOptionPane.YES_NO_OPTION);
+                //Deal with task in accordance to choice
+                if (choice == JOptionPane.YES_OPTION) {
+                    try {
+                        parent.write("DeleteMessage|" + parent.currentUser.getId() + "|" + u.getId());
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                    JOptionPane.showMessageDialog(this, "Chat history cleared");
+                }
+            }
+        });
+
         popupMenu.add(spam);
         popupMenu.add(clearChatHistory);
         popupMenu.show(list, x, y);
@@ -124,7 +162,7 @@ public class onlineUsers extends JPanel {
         this.parent = app;
         this.setLayout(new BorderLayout());
         navigation = new JLabel("Welcome, " + user.getName());
-        navigation.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
+        navigation.setFont(new Font("Source Code Pro", Font.BOLD, 14));
         navigation.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding
         navigation.setOpaque(true);
         navigation.setBackground(Color.LIGHT_GRAY);

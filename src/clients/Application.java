@@ -156,6 +156,34 @@ public class Application {
                         			chatting.AddChat(messageString);
                         		}
                         	}
+                        }else if(dataSplit[0].equals("GroupData")) {
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		chatting chatting  = (chatting)home.chatPanel;
+                        		//chatting.ClearChat();
+                        		String[] chatSplit = message.split("\\|\\|\\|");
+                        		String[] messageStrings = chatSplit[1].split("\\|");
+                        		String[] members = chatSplit[2].split("\\|\\|");
+                        		chatting.isGroup = true;
+                        		chatting.Lmembers.clear();
+                        		
+                        		chatting.information.setVisible(true);
+                        		for (String messageString : messageStrings) {
+                        			chatting.AddChat(messageString);
+                        		}
+                        		
+
+                        		System.out.print(chatSplit[2] + " " + members.length);
+                        		for (String member : members) {
+                        			String[] memberDataStrings = member.split("\\|");
+                        			User mUser = new User(memberDataStrings[0],memberDataStrings[1],true,memberDataStrings[2].equals("true") ? true : false);
+                        			if(mUser.id.equals(currentUser.id)) {
+                        				currentUser.setAdmin(mUser.isAdmin());
+                        			}
+                        			chatting.Lmembers.addElement(mUser);
+                        			System.out.println(memberDataStrings[0] + " " + memberDataStrings[1]);
+                        		}
+                        	}
                         }else if(dataSplit[0].equals("SendToUser")) {
                         	if(mainPanel instanceof home) {
                         		home home = (home) mainPanel;
@@ -177,7 +205,21 @@ public class Application {
                         			chatting.AddChat(dataSplit[2]);
                         		}
                         	}
-                    	}else if(dataSplit[0].equals("AddFriendSuccess")) {
+                    	}else if(dataSplit[0].equals("IsOffline")) {
+                        	System.out.print(dataSplit[1]);
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		onlineUsers olUsers  = (onlineUsers)home.userPanel;
+                        		olUsers.SetOffline(dataSplit[1]);
+                        	}
+                        }else if(dataSplit[0].equals("IsOnline")) {
+                        	System.out.print(dataSplit[1]);
+                        	if(mainPanel instanceof home) {
+                        		home home = (home) mainPanel;
+                        		onlineUsers olUsers  = (onlineUsers)home.userPanel;
+                        		olUsers.SetOnline(dataSplit[1]);
+                        	}
+                        }else if(dataSplit[0].equals("AddFriendSuccess")) {
                         	JOptionPane.showMessageDialog(mainPanel, "You just added new friend to the friends list");
                         }
                     }
@@ -206,14 +248,14 @@ public class Application {
         	applicationFrame = new JFrame();
         	Image icon = new ImageIcon(getClass().getResource("/icons/discord.png")).getImage();
             applicationFrame.setIconImage(icon);
-        	applicationFrame.add(new register(this));
+        	applicationFrame.add(new login(this));
         	Application.app = this;
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setTitle("Login");
-            applicationFrame.setFont(new Font("Comics San MS", Font.PLAIN, 12));
+            applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
             applicationFrame.getContentPane().setBackground(Color.WHITE);
             applicationFrame.setBackground(Color.WHITE);
-            applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
+            applicationFrame.getContentPane().setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
             applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
         	applicationFrame.setBounds(100, 100, 605, 476);
             applicationFrame.setVisible(true);
@@ -241,10 +283,10 @@ public class Application {
 
     	applicationFrame.setForeground(Color.BLACK);
         applicationFrame.setTitle("Login");
-        applicationFrame.setFont(new Font("Comics San MS", Font.PLAIN, 12));
+        applicationFrame.setFont(new Font("Comic Sans MS", Font.PLAIN, 12));
         applicationFrame.getContentPane().setBackground(Color.WHITE);
         applicationFrame.setBackground(Color.WHITE);
-        applicationFrame.getContentPane().setFont(new Font("Comics San MS", Font.PLAIN, 11));
+        applicationFrame.getContentPane().setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
         applicationFrame.getContentPane().setLayout(new BoxLayout(applicationFrame.getContentPane(), BoxLayout.X_AXIS));
     	applicationFrame.pack();
         applicationFrame.setVisible(true);

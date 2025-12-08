@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -112,22 +113,29 @@ public class home extends JPanel implements ActionListener {
 	    toCreateGroup.setBorderPainted(false);
 	    toCreateGroup.setFont(new Font("Comic Sans MS", Font.PLAIN, 10));
 	    toCreateGroup.addActionListener(new ActionListener() {
-	        @Override
-	        public void actionPerformed(ActionEvent e) {
-	            JTextField name = new JTextField();
-	            JLabel guide = new JLabel("Please type your friend name separated by (|)");
-	            JTextField members = new JTextField();
-	            Object[] message = {
-	                "Group name:", name,
-	                "Guide:", guide,
-	                "Friend Names:", members
-	            };
+	    	@Override
+			public void actionPerformed(ActionEvent e) {
+				JTextField name = new JTextField();
+				JLabel guide = new JLabel("Please type your friend name separated by (|)");
+				JTextField members = new JTextField();
+				Object[] message = {
+				    "Group name:", name,
+				    "Guide: ",guide,
+				    "Friend Names:", members
+				};
 
-	            int option = JOptionPane.showConfirmDialog(
-	                    null, message, "Create Group", JOptionPane.OK_CANCEL_OPTION);
-	            if (option == JOptionPane.OK_OPTION) {
-	            }
-	        }
+				int option = JOptionPane.showConfirmDialog(null, message, "Create Group", JOptionPane.OK_CANCEL_OPTION);
+				if (option == JOptionPane.OK_OPTION) {
+				    if (!name.getText().equals("") && !members.getText().equals("")) {
+				        try {
+							parent.write("CreateGroup||"+ name.getText()+ "||" + parent.currentUser.id + "||" + members.getText() + "|" + parent.currentUser.id+ "|");
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+				    }
+				}
+			 }
 	    });
 
 	    JPanel controlPanel = new JPanel(new GridLayout(1, 4));

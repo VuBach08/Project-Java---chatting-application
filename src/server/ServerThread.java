@@ -201,7 +201,9 @@ public class ServerThread implements Runnable {
                 // chức năng ADMIN
             	}else if (commandString.equals("AdminGetListUser")) {
                 AdminGetListUser(messageSplit);
-            }
+            	}else if (commandString.equals("AdminAddNewAccount")){
+                AdminAddNewAccount(messageSplit);
+            	}
             }
         } catch (IOException e) {
             isClosed = true;
@@ -851,6 +853,52 @@ public class ServerThread implements Runnable {
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminAddNewAccount(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_ADD_NEW_ACCOUNT_SQL = "INSERT INTO public.\"users\" (id, username, fullname, email, password, \"isAdmin\", lock, \"createAt\", address, dob, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            ZoneId utc = ZoneId.of("UTC+7");
+            ZonedDateTime curDate = ZonedDateTime.now(utc);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedDate = curDate.format(formatter);
+            Date sqlDate = Date.valueOf(formattedDate);
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_ADD_NEW_ACCOUNT_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // id
+                preparedStatement.setString(2, messageSplit[2]); // username
+                preparedStatement.setString(3, messageSplit[3]); // fullname
+                preparedStatement.setString(4, messageSplit[4]); // email
+                preparedStatement.setString(5, messageSplit[5]); // password
+                preparedStatement.setBoolean(6, Boolean.parseBoolean(messageSplit[6])); // isAdmin
+                preparedStatement.setBoolean(7, Boolean.parseBoolean(messageSplit[7])); // lock
+                preparedStatement.setDate(8, sqlDate); // createAt
+                preparedStatement.setString(9, messageSplit[8].equals("null") ? null : messageSplit[8]); // address
+                if (messageSplit[9].equals("null")) {
+                    preparedStatement.setNull(10, java.sql.Types.DATE); // dob
+                } else {
+                    preparedStatement.setDate(10, Date.valueOf(messageSplit[9])); // dob
+                }
+                preparedStatement.setString(11, messageSplit[10].equals("null") ? null : messageSplit[10]); // gender
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminAddNewAccount|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminAddNewAccount|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminAddNewAccount|fail");
+                e.printStackTrace();
             }
 
         } catch (ClassNotFoundException e) {

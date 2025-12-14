@@ -203,7 +203,9 @@ public class ServerThread implements Runnable {
                 AdminGetListUser(messageSplit);
             	}else if (commandString.equals("AdminAddNewAccount")){
                 AdminAddNewAccount(messageSplit);
-            	}
+            	}else if (commandString.equals("AdminUpdateAccount")) {
+                    AdminUpdateAccount(messageSplit);
+                }
             }
         } catch (IOException e) {
             isClosed = true;
@@ -898,6 +900,47 @@ public class ServerThread implements Runnable {
                 }
             } catch (SQLException e) {
                 Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminAddNewAccount|fail");
+                e.printStackTrace();
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminUpdateAccount(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_UPDATE_ACCOUNT_SQL = "UPDATE public.\"users\" SET username = ?, fullname = ?, email = ?, password = ?, \"isAdmin\" = ?, lock = ?, address = ?, dob = ?, gender = ? WHERE id = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_UPDATE_ACCOUNT_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // username
+                preparedStatement.setString(2, messageSplit[2]); // fullname
+                preparedStatement.setString(3, messageSplit[3]); // email
+                preparedStatement.setString(4, messageSplit[4]); // password
+                preparedStatement.setBoolean(5, Boolean.parseBoolean(messageSplit[5])); // isAdmin
+                preparedStatement.setBoolean(6, Boolean.parseBoolean(messageSplit[6])); // lock
+                preparedStatement.setString(7, messageSplit[7].equals("null") ? null : messageSplit[7]); // address
+                
+                if (messageSplit[8].equals("null")) {
+                    preparedStatement.setNull(8, java.sql.Types.DATE); // dob
+                } else {
+                    preparedStatement.setDate(8, Date.valueOf(messageSplit[8])); // dob
+                }
+                
+                preparedStatement.setString(9, messageSplit[9].equals("null") ? null : messageSplit[9]); // gender
+                preparedStatement.setString(10, messageSplit[10]); // id (WHERE clause)
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUpdateAccount|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUpdateAccount|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUpdateAccount|fail");
                 e.printStackTrace();
             }
 

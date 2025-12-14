@@ -205,6 +205,8 @@ public class ServerThread implements Runnable {
                 AdminAddNewAccount(messageSplit);
             	}else if (commandString.equals("AdminUpdateAccount")) {
                     AdminUpdateAccount(messageSplit);
+                }else if (commandString.equals("AdminDeleteAccount")) {
+                    AdminDeleteAccount(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -941,6 +943,32 @@ public class ServerThread implements Runnable {
                 }
             } catch (SQLException e) {
                 Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUpdateAccount|fail");
+                e.printStackTrace();
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminDeleteAccount(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_DELETE_ACCOUNT_SQL = "DELETE FROM public.\"users\" WHERE id = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_DELETE_ACCOUNT_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // id
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminDeleteAccount|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminDeleteAccount|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminDeleteAccount|fail");
                 e.printStackTrace();
             }
 

@@ -106,8 +106,7 @@ public class ServerThread implements Runnable {
                 	if(userRepo.register(messageSplit[1],messageSplit[2],messageSplit[3],messageSplit[4],messageSplit[5])) {
                 		Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "Register_Success|");
                 	}
-                }
-                else if(commandString.equals("Login")) {
+                }else if(commandString.equals("Login")) {
                     String result = userRepo.Login(messageSplit[1], messageSplit[2]);
                     System.out.println(result);
                     
@@ -200,13 +199,17 @@ public class ServerThread implements Runnable {
                 // =====================================
                 // chức năng ADMIN
             	}else if (commandString.equals("AdminGetListUser")) {
-                AdminGetListUser(messageSplit);
+            		AdminGetListUser(messageSplit);
             	}else if (commandString.equals("AdminAddNewAccount")){
-                AdminAddNewAccount(messageSplit);
+            		AdminAddNewAccount(messageSplit);
             	}else if (commandString.equals("AdminUpdateAccount")) {
                     AdminUpdateAccount(messageSplit);
                 }else if (commandString.equals("AdminDeleteAccount")) {
                     AdminDeleteAccount(messageSplit);
+                }else if (commandString.equals("AdminLockAccount")) {
+                    AdminLockAccount(messageSplit);
+                }else if (commandString.equals("AdminUnlockAccount")) {
+                    AdminUnlockAccount(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -969,6 +972,58 @@ public class ServerThread implements Runnable {
                 }
             } catch (SQLException e) {
                 Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminDeleteAccount|fail");
+                e.printStackTrace();
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminLockAccount(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_LOCK_ACCOUNT_SQL = "UPDATE public.\"users\" SET lock = TRUE WHERE id = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_LOCK_ACCOUNT_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // id
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminLockAccount|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminLockAccount|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminLockAccount|fail");
+                e.printStackTrace();
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminUnlockAccount(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_UNLOCK_ACCOUNT_SQL = "UPDATE public.\"users\" SET lock = FALSE WHERE id = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_UNLOCK_ACCOUNT_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // id
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUnlockAccount|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUnlockAccount|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUnlockAccount|fail");
                 e.printStackTrace();
             }
 

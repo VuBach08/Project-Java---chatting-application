@@ -210,6 +210,8 @@ public class ServerThread implements Runnable {
                     AdminLockAccount(messageSplit);
                 }else if (commandString.equals("AdminUnlockAccount")) {
                     AdminUnlockAccount(messageSplit);
+                }else if (commandString.equals("AdminRenewPassword")) {
+                    AdminRenewPassword(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1024,6 +1026,32 @@ public class ServerThread implements Runnable {
                 }
             } catch (SQLException e) {
                 Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminUnlockAccount|fail");
+                e.printStackTrace();
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminRenewPassword(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_RENEW_PASSWORD_SQL = "UPDATE public.\"users\" SET password = ? WHERE id = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_RENEW_PASSWORD_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[2]); // new password
+                preparedStatement.setString(2, messageSplit[1]); // id
+
+                int rowsAffected = preparedStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminRenewPassword|success");
+                } else {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminRenewPassword|fail");
+                }
+            } catch (SQLException e) {
+                Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminRenewPassword|fail");
                 e.printStackTrace();
             }
 

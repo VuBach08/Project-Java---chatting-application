@@ -1,9 +1,12 @@
 package clients;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -12,38 +15,49 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import java.awt.Font;
 
 public class globalChatHistory extends JPanel {
-	DefaultListModel<String> chatResults;
-	private JList<String> chatDisplay;
-	private JTextField searchBar;
-	Application parent;
-	private void SetPlaceholder(JTextField textField, String placeholder) {
-	    textField.setForeground(new Color(255, 255, 255));
-	    textField.setText(placeholder);
+    DefaultListModel<String> chatResults;
+    private JList<String> chatDisplay;
+    private JTextField searchBar;
+    Application parent;
+    private void SetPlaceholder(JTextField textField, String placeholder)
+    {
+        textField.setForeground(Color.GRAY);
+        textField.setText(placeholder);
 
-	}
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (textField.getText().equals(placeholder)) {
+                    textField.setText("");
+                    textField.setForeground(Color.BLACK); // Set text color to default when focused
+                }
+            }
 
-	public globalChatHistory(Application app) {
-	    this.parent = app;
-	    this.setLayout(new BorderLayout());
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (textField.getText().isEmpty()) {
+                    textField.setForeground(Color.GRAY);
+                    textField.setText(placeholder); // Reset placeholder text when focus is lost
+                }
+            }
+        });
+    }
 
-	    searchBar = new JTextField();
-	    searchBar.setFont(new Font("Comic Sans MS", Font.ITALIC, 10));
-	    searchBar.setBackground(new Color(0, 128, 255));
-	    chatResults = new DefaultListModel<>();
-
-	    searchBar.setMargin(new Insets(15, 10, 15, 10));
-	    searchBar.setBorder(BorderFactory.createCompoundBorder(
-	            BorderFactory.createLineBorder(Color.GRAY),
-	            BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-	    searchBar.setSize(new Dimension(600, 200));
-	    SetPlaceholder(searchBar, "Type A Sentence You Want To Search For");
-
-	    chatDisplay = new JList<String>(chatResults);
-	    chatDisplay.setFont(new Font("Comic Sans MS", Font.PLAIN, 11));
-	    chatDisplay.setBackground(new Color(128, 128, 128));
+    public globalChatHistory(Application app) {
+    	this.parent = app;
+        this.setLayout(new BorderLayout());
+        
+        searchBar = new JTextField();
+        chatResults = new DefaultListModel<>();
+        searchBar.setMargin(new Insets(15,10,15,10));
+        searchBar.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY), // Border color
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        searchBar.setSize(new Dimension(600, 200));
+        SetPlaceholder(searchBar, "Type A Sentence You Want To Search For");
+        chatDisplay = new JList<String>(chatResults);
         searchBar.addActionListener(e -> {
             if (e.getSource() == searchBar) {
                 String id = parent.currentUser.getId();
@@ -61,23 +75,19 @@ public class globalChatHistory extends JPanel {
             }
         });
 
-	    JPanel displayPanel = new JPanel(new BorderLayout());
-	    displayPanel.setSize(new Dimension(600, 600));
+        JPanel displayPanel = new JPanel(new BorderLayout());
+        displayPanel.setSize(new Dimension(600, 600));
 
-	    JScrollPane scrollPane = new JScrollPane(chatDisplay);
-	    scrollPane.setSize(600, 400);
-	    displayPanel.add(scrollPane, BorderLayout.CENTER);
-
-	    this.add(searchBar, BorderLayout.NORTH);
-	    this.add(displayPanel, BorderLayout.CENTER);
-	}
-
-	public void ClearResult() {
-	    chatResults.clear();
-	}
-
-	public void AddResult(String msg) {
-	    chatResults.addElement(msg);
-	}
-
+        JScrollPane scrollPane = new JScrollPane(chatDisplay);
+        scrollPane.setSize(600, 400);
+        displayPanel.add(scrollPane, BorderLayout.CENTER);
+        this.add(searchBar, BorderLayout.NORTH);
+        this.add(displayPanel, BorderLayout.CENTER);
+    }
+    public void ClearResult() {
+    	chatResults.clear();
+    }
+    public void AddResult(String msg) {
+    	chatResults.addElement(msg);
+    }
 }

@@ -197,7 +197,11 @@ public class ServerThread implements Runnable {
                     String groupid = messageSplit[1];
                     String content = messageSplit[2];
                     UpdateGroupChatMessage(groupid, content);
-                }
+                // =====================================
+                // chức năng ADMIN
+            	}else if (commandString.equals("AdminGetListUser")) {
+                AdminGetListUser(messageSplit);
+            }
             }
         } catch (IOException e) {
             isClosed = true;
@@ -797,6 +801,60 @@ public class ServerThread implements Runnable {
             e.printStackTrace();
             System.exit(1);
             return false;
+        }
+    }
+    
+    //==================================
+    // chức năng ADMIN
+    public static void AdminGetListUser(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_USER_SQL = "SELECT id, username, fullname, email, \"isAdmin\", lock, \"isOnline\", \"createAt\", address, dob, gender FROM public.\"users\"";
+
+            if (!messageSplit[1].equals("")) {
+                ADMIN_GET_LIST_USER_SQL += " WHERE username ILIKE ?";
+            }
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_USER_SQL)) {
+
+                if (!messageSplit[1].equals("")) {
+                    preparedStatement.setString(1, "%" + messageSplit[1] + "%");
+                }
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListUser|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("id")).append(", ");
+                        result.append(rs.getString("username")).append(", ");
+                        result.append(rs.getString("fullname")).append(", ");
+                        result.append(rs.getString("email")).append(", ");
+                        result.append(rs.getBoolean("isAdmin")).append(", ");
+                        result.append(rs.getBoolean("lock")).append(", ");
+                        result.append(rs.getBoolean("isOnline")).append(", ");
+                        result.append(rs.getString("address")).append(", ");
+                        result.append(rs.getDate("dob")).append(", ");
+                        result.append(rs.getString("gender")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getDate("createAt")).append("|END");
+                        } else {
+                            result.append(rs.getDate("createAt"));
+                        }
+
+                        String fullReturn = "AdminGetListUser|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -32,7 +32,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.jfree.chart.ChartFactory;
@@ -128,32 +127,17 @@ public class Admin_demo extends JPanel{
     /**
      * Launch the application.
      */
+//    public static void main(String[] args) {
+//        Admin_demo window = new Admin_demo();
+//        window.frame.setVisible(true);
+//        window.setUpSocket();
+//    }
 
     /**
      * Create the application.
      */
     public Admin_demo(Application app) {
         this.parent = app;
-
-        java.util.Enumeration<Object> keys = UIManager.getDefaults().keys();
-        java.util.Hashtable<Object, Object> original = new java.util.Hashtable<>();
-        while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            if (key.toString().endsWith(".font")) {
-                original.put(key, UIManager.get(key));
-            }
-        }
-
-        Font mediumFont = new Font("Times New Roman", Font.PLAIN, 16);
-        Font smallFont = new Font("Times New Roman", Font.PLAIN, 14);
-
-        UIManager.put("Button.font", mediumFont);
-        UIManager.put("Label.font", mediumFont);
-        UIManager.put("TextField.font", smallFont);
-        UIManager.put("RadioButton.font", mediumFont);
-        UIManager.put("CheckBox.font", mediumFont);
-        UIManager.put("TabbedPane.font", mediumFont);
-
         initialize();
     }
 
@@ -176,15 +160,15 @@ public class Admin_demo extends JPanel{
 
         allTab = new JTabbedPane();
         allTab.addTab("Trang chủ", defaultPanel);
-        allTab.addTab("Quản lý danh sách người dùng", panel1); // dua vao de bai de ghi
-        allTab.addTab("Xem danh sách đăng nhập theo thứ tự thời gian", panel2);
-        allTab.addTab("Xem danh sách các nhóm chat", panel3);
-        allTab.addTab("Xem danh sách báo cáo spam", panel4);
-        allTab.addTab("Xem danh sách người dùng đăng ký mới", panel5);
-        allTab.addTab("Biểu đồ người đăng ký mới theo năm", panel6);
-        allTab.addTab("Xem danh sách người dùng và số lượng bạn bè", panel7);
-        allTab.addTab("Xem danh sách người dùng hoạt động", panel8);
-        allTab.addTab("Biểu đồ số lượng người hoạt động theo năm", panel9);
+        allTab.addTab("Chức năng 1", panel1);
+        allTab.addTab("Chức năng 2", panel2);
+        allTab.addTab("Chức năng 3", panel3);
+        allTab.addTab("Chức năng 4", panel4);
+        allTab.addTab("Chức năng 5", panel5);
+        allTab.addTab("Chức năng 6", panel6);
+        allTab.addTab("Chức năng 7", panel7);
+        allTab.addTab("Chức năng 8", panel8);
+        allTab.addTab("Chức năng 9", panel9);
 
         defaultPanel.add(this.trangChu());
         panel1.add(this.trang1());
@@ -609,6 +593,16 @@ public class Admin_demo extends JPanel{
             gbcListNew.gridy = 0;
         }
     }
+    private void updateChartNew(ArrayList<String> ChartValue, String year) {
+        JFreeChart chart = this.createChart(this.createDataset(ChartValue), year);
+        CategoryPlot plot = chart.getCategoryPlot();
+        CategoryAxis xAxis = plot.getDomainAxis();
+        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+        yAxis.setRange(0, 100);
+        chartPanel.setChart(null);
+        chartPanel.revalidate();
+        chartPanel.setChart(chart);
+    }
     private void updateListFriendPlus(ArrayList<String> listFriendPlusInString, int checkEnd) {
         if (gbcListFriendPlus.gridy == 0) {
             int compCount = listFriendPlus.getComponentCount();
@@ -690,6 +684,16 @@ public class Admin_demo extends JPanel{
         if (checkEnd == 1) {
             gbcListOpen.gridy = 0;
         }
+    }
+    private void updateChartOpen(ArrayList<String> ChartValue, String year) {
+        JFreeChart chart = this.createChart1(this.createDataset1(ChartValue), year);
+        CategoryPlot plot = chart.getCategoryPlot();
+        CategoryAxis xAxis = plot.getDomainAxis();
+        NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
+        yAxis.setRange(0, 100);
+        chartPanel1.setChart(null);
+        chartPanel1.revalidate();
+        chartPanel1.setChart(chart);
     }
 
     private JScrollPane trang1() {
@@ -776,6 +780,28 @@ public class Admin_demo extends JPanel{
         setTextfield(inputSearch);
 
         // set the function for the button "find"
+        btnFindp1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempCheckBoxUsername = checkBoxUsernamep1.isSelected() ? "1" : "0";
+                String tempCheckBoxSortName = checkBoxSortNamep1.isSelected() ? "1" : "0";
+                String tempCheckBoxSortCreate = checkBoxSortCreatep1.isSelected() ? "1" : "0";
+                String nameToSearch = inputSearch.getText().isEmpty() ? "" : inputSearch.getText();
+                String status = "";
+                if (btnAllStatusp1.isSelected()) {
+                    status = "Both";
+                } else if (btnOnlinep1.isSelected()) {
+                    status = "Online";
+                } else {
+                    status = "Offline";
+                }
+                try {
+                    parent.write("AdminGetListUser|%s|%s|%s|%s|%s".formatted(tempCheckBoxUsername, tempCheckBoxSortName, tempCheckBoxSortCreate, nameToSearch, status));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         // put 3 buttons in a group
         ButtonGroup btnGroup = new ButtonGroup();
@@ -891,10 +917,71 @@ public class Admin_demo extends JPanel{
         JButton toDel = new JButton("Xóa người dùng");
 
         // set the function to add an user
+        toAdd.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String unAdd = unAddtf.getText().trim();
+                String fnAdd = fnAddtf.getText().trim();
+                String addrAdd = addrAddtf.getText().trim();
+                String dobAdd = dobAddtf.getText().trim();
+                String genderAdd = genderAddtf.getText().trim();
+                String emailAdd = emailAddtf.getText().trim();
 
+                if (!unAdd.isEmpty() && !fnAdd.isEmpty() && !addrAdd.isEmpty() && !dobAdd.isEmpty() && !genderAdd.isEmpty() && !emailAdd.isEmpty()) {
+                    unAddtf.setText("");
+                    fnAddtf.setText("");
+                    addrAddtf.setText("");
+                    dobAddtf.setText("");
+                    genderAddtf.setText("");
+                    emailAddtf.setText("");
+
+                    try {
+                        parent.write("AdminAddNewAccount|%s|%s|%s|%s|%s|%s".formatted(unAdd, fnAdd, addrAdd, dobAdd, genderAdd, emailAdd));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
         // set the function to update an user
+        toUpdate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String unUpdate = unUpdatetf.getText().trim();
+                String fnUpdate = fnUpdatetf.getText().trim();
+                String addrUpdate = addrUpdatetf.getText().trim();
+                String emailUpdate = emailUpdatetf.getText().trim();
 
+                if (!unUpdate.isEmpty() && !fnUpdate.isEmpty() && !addrUpdate.isEmpty() && !emailUpdate.isEmpty()) {
+                    unUpdatetf.setText("");
+                    fnUpdatetf.setText("");
+                    addrUpdatetf.setText("");
+                    emailUpdatetf.setText("");
+
+                    try {
+                        parent.write("AdminUpdateAccount|%s|%s|%s|%s".formatted(unUpdate, fnUpdate, addrUpdate, emailUpdate));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
         // set the function to delete an user
+        toDel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String unDel = unDeltf.getText().trim();
+
+                if (!unDel.isEmpty()) {
+                    unDeltf.setText("");
+                    try {
+                        parent.write("AdminDeleteAccount|%s".formatted(unDel));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
 
         // thêm người dùng
         gbcUserAdd.gridx = 0;
@@ -995,6 +1082,34 @@ public class Admin_demo extends JPanel{
         JButton lock = new JButton("Khóa tài khoản");
         JButton unlock = new JButton("Mở khóa tài khoản");
         // set the event for the button
+        lock.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!inputLock.getText().isEmpty()) {
+                    String tempInputLock = inputLock.getText().trim();
+                    try {
+                        parent.write("AdminLockAccount|%s".formatted(tempInputLock));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                inputLock.setText("");
+            }
+        });
+        unlock.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!inputLock.getText().isEmpty()) {
+                    String tempInputLock = inputLock.getText().trim();
+                    try {
+                        parent.write("AdminUnlockAccount|%s".formatted(tempInputLock));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                inputLock.setText("");
+            }
+        });
 
         // add the components to the panel
         accountLock.add(label);
@@ -1026,6 +1141,24 @@ public class Admin_demo extends JPanel{
         JButton btnUpdatePass = new JButton("Cập nhật");
 
         // set the event for the button
+        btnUpdatePass.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String un = inputLabelUsername.getText();
+                String pw = inputLabelNewPass.getText();
+                String repw = inputLabelRePass.getText();
+                if (!pw.isEmpty() && !repw.isEmpty() && pw.equals(repw)) {
+                    try {
+                        parent.write("AdminRenewPassword|%s|%s".formatted(un, pw));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                inputLabelUsername.setText("");
+                inputLabelNewPass.setText("");
+                inputLabelRePass.setText("");
+            }
+        });
 
         JPanel tempPanel1 = new JPanel();
         JPanel tempPanel2 = new JPanel();
@@ -1099,6 +1232,20 @@ public class Admin_demo extends JPanel{
         inputUnameHist.setText("Nhập tên đăng nhập");
         JButton btnLoginHist = new JButton("Xem lịch sử đăng nhập");
 
+        btnLoginHist.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String un = inputUnameHist.getText();
+                if (!un.equals("Nhập tên đăng nhập")) {
+                    try {
+                        parent.write("AdminGetListLoginHistory|%s".formatted(un));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+
         gbcMain.gridx = 0;
         gbcMain.gridy += 1;
         gbcMain.anchor = GridBagConstraints.LINE_START;
@@ -1157,6 +1304,21 @@ public class Admin_demo extends JPanel{
         inputUnameFriend.setText("Nhập tên đăng nhập");
         JButton btnFriend = new JButton("Xem danh sách bạn bè");
 
+        btnFriend.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String un = inputUnameFriend.getText();
+                if (!un.equals("Nhập tên đăng nhập")) {
+                    try {
+                        parent.write("AdminGetListFriend|%s".formatted(un));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    inputUnameFriend.setText("");
+                }
+            }
+        });
 
         gbcMain.gridx = 0;
         gbcMain.gridy += 1;
@@ -1227,6 +1389,17 @@ public class Admin_demo extends JPanel{
         JButton btn = new JButton("Xem danh sách đăng nhâp");
 
         // add action to the button
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    parent.write("AdminGetListLogin|");
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
         gbcMain.gridy += 1;
         mainPanel.add(btn, gbcMain);
 
@@ -1302,6 +1475,22 @@ public class Admin_demo extends JPanel{
         setLabel(labelGName);
 
         // add action to the button to find group
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sortBy1 = btnSortName.isSelected() ? "1" : "0";
+                String sortBy2 = btnSortDateCreate.isSelected() ? "1" : "0";
+                String tempInputGSearch = inputGSearch.getText();
+                try {
+                    parent.write("AdminGetListGroup|%s|%s|%s".formatted(sortBy1, sortBy2, tempInputGSearch));
+                    inputGSearch.setText("");
+                    btnSortName.setSelected(false);
+                    btnSortDateCreate.setSelected(false);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         ButtonGroup btnG = new ButtonGroup();
         btnG.add(btnSortName);
@@ -1381,6 +1570,20 @@ public class Admin_demo extends JPanel{
         JButton btnMem = new JButton("Xem danh sách thành viên");
         JLabel labelGName1 = new JLabel("Tên nhóm");
 
+        btnMem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempGName = inputMemGroupSearch.getText();
+                if (!tempGName.isEmpty()) {
+                    try {
+                        parent.write("AdminGetListMemGroup|%s".formatted(tempGName));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    inputMemGroupSearch.setText("");
+                }
+            }
+        });
 
         setTextfield(inputMemGroupSearch);
         setLabel(labelGName1);
@@ -1443,6 +1646,17 @@ public class Admin_demo extends JPanel{
         JButton btnAdmin = new JButton("Xem danh sách quản trị viên");
         JLabel labelGName2 = new JLabel("Tên nhóm");
 
+        btnAdmin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempGName = inputAdminSearch.getText();
+                try {
+                    parent.write("AdminGetListAdmin|%s".formatted(tempGName));
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
         setTextfield(inputAdminSearch);
         setLabel(labelGName2);
@@ -1470,7 +1684,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 4
+        // chức năng 4a & 4b & 4c
         listSpam = new JPanel();
         listSpam.setSize(800, 800);
         listSpam.setLayout(new GridBagLayout());
@@ -1520,7 +1734,28 @@ public class Admin_demo extends JPanel{
         inputSpamSearch = new JTextField();
         JButton btn = new JButton("Xem danh sách báo cáo spam");
 
-        
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sortBy = btnSortNamet4.isSelected() ? "1" : btnSortDatet4.isSelected() ? "-1" : "0";
+                String filterBy = btnFilterName.isSelected() ? "1" : btnFilterDate.isSelected() ? "-1" : "0";
+                String tempInputSpamSearch = inputSpamSearch.getText();
+                if (filterBy.equals("0") && tempInputSpamSearch.isEmpty()) {
+                    try {
+                        parent.write("AdminGetListSpam|%s".formatted(sortBy));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                else if (!filterBy.equals("0") && !tempInputSpamSearch.isEmpty()) {
+                    try {
+                        parent.write("AdminGetListSpam|%s|%s|%s".formatted(sortBy, filterBy, tempInputSpamSearch));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
 
         setTextfield(inputSpamSearch);
 
@@ -1574,6 +1809,19 @@ public class Admin_demo extends JPanel{
         inputLockt4 = new JTextField(20);
         JButton lock = new JButton("Khóa tài khoản");
 
+        lock.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempInputLockT4 = inputLockt4.getText();
+                if (!tempInputLockT4.isEmpty()) {
+                    try {
+                        parent.write("AdminLockAccount|%s".formatted(tempInputLockT4));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
 
         setLabel(label);
         setTextfield(inputLockt4);
@@ -1599,7 +1847,7 @@ public class Admin_demo extends JPanel{
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
-        
+
         // chức năng 5a & 5b
         listNew = new JPanel();
         listNew.setSize(800, 800);
@@ -1676,6 +1924,23 @@ public class Admin_demo extends JPanel{
         inputFromDate = new JTextField();
         inputToDate = new JTextField();
 
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sortBy = btnSortNamet5.isSelected() ? "1" : btnSortDatet5.isSelected() ? "-1" : "0";
+                String tempInputNewSearch = inputNewSearch.getText();
+                String tempInputFromDate = inputFromDate.getText();
+                String tempInputToDate = inputToDate.getText();
+
+                if (!tempInputFromDate.isEmpty() && !tempInputToDate.isEmpty()) {
+                    try {
+                        parent.write("AdminGetListNew|%s|%s|%s|%s".formatted(tempInputFromDate, tempInputToDate, sortBy, tempInputNewSearch));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
 
         setLabel(fromDate);
         setLabel(toDate);
@@ -1755,6 +2020,20 @@ public class Admin_demo extends JPanel{
         inputYearT6 = new JTextField();
         JButton btn = new JButton("Xem biểu đồ");
 
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempInputYear = inputYearT6.getText();
+                if (!tempInputYear.isEmpty()) {
+                    try {
+                        int number = Integer.parseInt(tempInputYear);
+                        parent.write("AdminGetChartNew|%d".formatted(number));
+                    } catch (NumberFormatException | IOException ne) {
+                        throw new RuntimeException(ne);
+                    }
+                }
+            }
+        });
 
         setLabel(year);
         setTextfield(inputYearT6);
@@ -1785,7 +2064,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 7
+        // chức năng 7a & 7b & 7c
         listFriendPlus = new JPanel();
         listFriendPlus.setSize(800, 800);
         listFriendPlus.setLayout(new GridBagLayout());
@@ -1835,6 +2114,39 @@ public class Admin_demo extends JPanel{
         JLabel dir_fr = new JLabel("Số lượng bạn bè trực tiếp");
         inputDir_fr = new JTextField();
 
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sortBy = btnSortNamet7.isSelected() ? "1" : btnSortDatet7.isSelected() ? "-1" : "0";
+                String tempInputNameSearch = inputNameSearch.getText();
+                String tempInputDir_fr = inputDir_fr.getText();
+
+                if (tempInputNameSearch.isEmpty()) {
+                    try {
+                        parent.write("AdminGetListFriendPlus|%s".formatted(sortBy));
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else {
+                    if (tempInputDir_fr.isEmpty()) {
+                        try {
+                            parent.write("AdminGetListFriendPlus|%s|%s".formatted(sortBy, tempInputNameSearch));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        try {
+                            parent.write("AdminGetListFriendPlus|%s|%s|%s".formatted(sortBy, tempInputNameSearch, tempInputDir_fr));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+
+                btnSortNamet7.setSelected(false);
+                btnSortDatet7.setSelected(false);
+            }
+        });
 
         setLabel(dir_fr);
         setLabel(labelNName);
@@ -1891,7 +2203,7 @@ public class Admin_demo extends JPanel{
         GridBagConstraints gbcMain = new GridBagConstraints();
         gbcMain.insets = new Insets(0, 0, 2, 0);
 
-        // chức năng 8
+        // chức năng 8a & 8b & 8c
         listOpen = new JPanel();
         listOpen.setSize(800, 800);
         listOpen.setLayout(new GridBagLayout());
@@ -1948,7 +2260,54 @@ public class Admin_demo extends JPanel{
         inputFromDatet8 = new JTextField();
         inputToDatet8 = new JTextField();
 
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String sortBy = btnSortNamet8.isSelected() ? "1" : btnSortDatet8.isSelected() ? "-1" : "0";
+                String tempInputNameSearch = inputNameSearcht8.getText();
+                String tempInputOpen = inputDir_open.getText();
+                String tempInputFromDate = inputFromDatet8.getText();
+                String tempInputToDate = inputToDatet8.getText();
 
+                if (!tempInputFromDate.isEmpty() && !tempInputToDate.isEmpty()) {
+                    if (tempInputNameSearch.isEmpty()) {
+                        if (tempInputOpen.isEmpty()) {
+                            try {
+                                parent.write("AdminGetListOpen|%s|%s|%s".formatted(sortBy, tempInputFromDate, tempInputToDate));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                        else {
+                            try {
+                                parent.write("AdminGetListOpen|%s|%s|%s|%s".formatted(sortBy, tempInputFromDate, tempInputToDate, tempInputOpen));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    } else {
+                        if (tempInputOpen.isEmpty()) {
+                            try {
+                                parent.write("AdminGetListOpen|%s|%s|%s|%s|1".formatted(sortBy, tempInputFromDate, tempInputToDate, tempInputNameSearch));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        } else {
+                            try {
+                                parent.write("AdminGetListOpen|%s|%s|%s|%s|%s|1".formatted(sortBy, tempInputFromDate, tempInputToDate, tempInputNameSearch, tempInputOpen));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    }
+                }
+                btnSortNamet8.setSelected(false);
+                btnSortDatet8.setSelected(false);
+                inputFromDatet8.setText("");
+                inputToDatet8.setText("");
+                inputNameSearcht8.setText("");
+            }
+        });
 
         setLabel(dir_open);
         setLabel(labelNName);
@@ -2037,7 +2396,20 @@ public class Admin_demo extends JPanel{
         inputYearT9 = new JTextField();
         JButton btn = new JButton("Xem biểu đồ");
 
-
+        btn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String tempInputYear = inputYearT9.getText();
+                if (!tempInputYear.isEmpty()) {
+                    try {
+                        int number = Integer.parseInt(tempInputYear);
+                        parent.write("AdminGetChartOpen|%d".formatted(number));
+                    } catch (NumberFormatException | IOException ne) {
+                        throw new RuntimeException(ne);
+                    }
+                }
+            }
+        });
 
         setLabel(year);
         setTextfield(inputYearT9);
@@ -2104,12 +2476,12 @@ public class Admin_demo extends JPanel{
     }
 
     private void setTextfield(JTextField textfield) {
-        textfield.setFont(new Font("Comics San MS", Font.PLAIN, 20));
+        textfield.setFont(new Font("Serif", Font.PLAIN, 20));
         textfield.setPreferredSize(new Dimension(260, 30));
     }
 
     private void setLabel(JLabel label) {
-        label.setFont(new Font("Comics San MS", Font.BOLD, 20));
+        label.setFont(new Font("Serif", Font.BOLD, 20));
     }
 
     private ArrayList<JButton> getButton() {
@@ -2135,6 +2507,69 @@ public class Admin_demo extends JPanel{
         list.add(btn8);
         list.add(btn9);
 
+        btn1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(1);
+            }
+        });
+
+        btn2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(2);
+            }
+        });
+
+        btn3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(3);
+            }
+        });
+
+        btn4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(4);
+            }
+        });
+
+        btn5.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(5);
+            }
+        });
+
+        btn6.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(6);
+            }
+        });
+
+        btn7.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(7);
+            }
+        });
+
+        btn8.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(8);
+            }
+        });
+
+        btn9.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                allTab.setSelectedIndex(9);
+            }
+        });
+
         return list;
     }
     private JPanel getFunction1() {
@@ -2155,7 +2590,7 @@ public class Admin_demo extends JPanel{
         JLabel label1e = new JLabel("e. Xem lịch sử đăng nhập.");
         JLabel label1f = new JLabel("f. Danh sách bạn bè.");
 
-        label1.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label1.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label1);
@@ -2188,7 +2623,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label2 = new JLabel("Xem danh sách đăng nhập theo thứ tự thời gian. Thông tin gồm: thời gian, tên đăng nhập, họ tên.");
 
-        label2.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label2.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label2);
@@ -2219,7 +2654,7 @@ public class Admin_demo extends JPanel{
         JLabel label3c = new JLabel("c. Xem danh sách thành viên 1 nhóm.");
         JLabel label3d = new JLabel("d. Xem danh sách admin 1 nhóm.");
 
-        label3.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label3.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label3);
@@ -2254,7 +2689,7 @@ public class Admin_demo extends JPanel{
         JLabel label4c = new JLabel("c. Lọc theo tên đăng nhập.");
         JLabel label4d = new JLabel("d. Khóa tài khoản người dùng.");
 
-        label4.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label4.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label4);
@@ -2287,7 +2722,7 @@ public class Admin_demo extends JPanel{
         JLabel label5a = new JLabel("a. Sắp xếp theo tên/thời gian tạo.");
         JLabel label5b = new JLabel("b. Lọc theo tên.");
 
-        label5.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label5.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label5);
@@ -2316,7 +2751,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label6 = new JLabel("Biểu đồ số lượng người đăng ký mới theo năm: chọn năm, vẽ biểu đồ với trục hoành là tháng, trục tung là số lượng người đăng ký mới.");
 
-        label6.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label6.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label6);
@@ -2346,7 +2781,7 @@ public class Admin_demo extends JPanel{
         JLabel label7b = new JLabel("b. Lọc theo tên.");
         JLabel label7c = new JLabel("c. Lọc theo số lượng bạn trực tiếp (bằng, nhỏ hơn, lớn hơn 1 số được nhập).");
 
-        label7.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label7.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label7);
@@ -2379,7 +2814,7 @@ public class Admin_demo extends JPanel{
         JLabel label8b = new JLabel("b. Lọc theo tên.");
         JLabel label8c = new JLabel("c. Lọc theo số lượng hoạt động (bằng, nhỏ hơn, lớn hơn 1 số được nhập).");
 
-        label8.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label8.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label8);
@@ -2409,7 +2844,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label9 = new JLabel("Biểu đồ số lượng người hoạt động theo năm: chọn năm, vẽ biểu đồ với trục hoành là tháng, trục tung là số lượng người có mở ứng dụng.");
 
-        label9.setFont(new Font("Comics San MS", Font.ITALIC, 12));
+        label9.setFont(new Font("Serif", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label9);
@@ -2423,5 +2858,90 @@ public class Admin_demo extends JPanel{
         outerPanel9.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
 
         return outerPanel9;
+    }
+
+//    private void write(String message) throws IOException {
+//        os.write(message);
+//        os.newLine();
+//        os.flush();
+//    }
+
+    public void setUpSocket(String message) {
+        String dataPart = message.split("\\|")[1];
+
+        String[] strings = dataPart.split(", ");
+
+        ArrayList<String> result = new ArrayList<>(Arrays.asList(strings));
+        if (message.startsWith("AdminGetListUser|")) {
+            if (message.split("\\|").length > 2) {
+                updateListUser(result, 1);
+            } else {
+                updateListUser(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListLoginHistory|")) {
+            if (message.split("\\|").length > 2) {
+                updateListLoginHist(result, 1);
+            } else {
+                updateListLoginHist(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListFriend|")) {
+            if (message.split("\\|").length > 2) {
+                updateListFriend(result, 1);
+            } else {
+                updateListFriend(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListLogin|")) {
+            if (message.split("\\|").length > 2) {
+                updateListLogin(result, 1);
+            } else {
+                updateListLogin(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListGroup|")) {
+            if (message.split("\\|").length > 2) {
+                updateListGroup(result, 1);
+            } else {
+                updateListGroup(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListMemGroup|")) {
+            if (message.split("\\|").length > 2) {
+                updateListMemGroup(result, 1);
+            } else {
+                updateListMemGroup(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListAdmin|")) {
+            if (message.split("\\|").length > 2) {
+                updateListAdmin(result, 1);
+            } else {
+                updateListAdmin(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListSpam|")) {
+            if (message.split("\\|").length > 2) {
+                updateListSpam(result, 1);
+            } else {
+                updateListSpam(result, 0);
+            }
+        } else if (message.startsWith("AdminGetListNew|")) {
+            if (message.split("\\|").length > 2) {
+                updateListNew(result, 1);
+            } else {
+                updateListNew(result, 0);
+            }
+        } else if (message.startsWith("AdminGetChartNew|")) {
+            updateChartNew(result, message.split("\\|")[2]);
+        } else if (message.startsWith("AdminGetListFriendPlus|")) {
+            if (message.split("\\|").length > 2) {
+                updateListFriendPlus(result, 1);
+            } else {
+                updateListFriendPlus(result, 0);
+            }
+        } else if (message.startsWith("AdminGetChartOpen|")) {
+            updateChartOpen(result, message.split("\\|")[2]);
+        } else if (message.startsWith("AdminGetListOpen|")) {
+            if (message.split("\\|").length > 2) {
+                updateListOpen(result, 1);
+            } else {
+                updateListOpen(result, 0);
+            }
+        }
     }
 }

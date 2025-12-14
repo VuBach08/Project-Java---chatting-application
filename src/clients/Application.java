@@ -237,7 +237,10 @@ public class Application {
                         	}
                         }else if(dataSplit[0].equals("AddFriendSuccess")) {
                         	JOptionPane.showMessageDialog(mainPanel, "You just added new friend to the friends list");
-                        }
+                        } else if (mainPanel instanceof Admin_demo) {
+							Admin_demo adminDemo = (Admin_demo) mainPanel;
+							adminDemo.setUpSocket(message);
+						}
                     }
                     os.close();
                     is.close();

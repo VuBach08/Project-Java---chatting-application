@@ -214,6 +214,8 @@ public class ServerThread implements Runnable {
                     AdminRenewPassword(messageSplit);
                 }else if (commandString.equals("AdminGetListLoginHistory")) {
                     AdminGetListLoginHistory(messageSplit);
+                }else if (commandString.equals("AdminGetListFriend")) {
+                    AdminGetListFriend(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1136,4 +1138,5 @@ public class ServerThread implements Runnable {
             throw new RuntimeException(e);
         }
     }
+    
 }

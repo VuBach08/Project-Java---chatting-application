@@ -212,6 +212,10 @@ public class ServerThread implements Runnable {
                     AdminUnlockAccount(messageSplit);
                 }else if (commandString.equals("AdminRenewPassword")) {
                     AdminRenewPassword(messageSplit);
+                }else if (commandString.equals("AdminGetListLoginHistory")) {
+                    AdminGetListLoginHistory(messageSplit);
+                }else if (commandString.equals("AdminGetListFriend")) {
+                    AdminGetListFriend(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1053,6 +1057,81 @@ public class ServerThread implements Runnable {
             } catch (SQLException e) {
                 Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminRenewPassword|fail");
                 e.printStackTrace();
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListLoginHistory(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_LOGIN_HISTORY_SQL = "SELECT username, logdate AT TIME ZONE 'UTC+7' AS logdate FROM public.logs WHERE username = ? ORDER BY logdate DESC";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_LOGIN_HISTORY_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // username
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListLoginHistory|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("username")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getTimestamp("logdate")).append("|END");
+                        } else {
+                            result.append(rs.getTimestamp("logdate"));
+                        }
+
+                        String fullReturn = "AdminGetListLoginHistory|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListFriend(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_FRIEND_SQL = "SELECT u1.username AS user1, u2.username AS user2 " +
+                    "FROM public.\"users\" u1, public.\"users\" u2 " +
+                    "WHERE u2.id = ANY(u1.friends) AND u1.username = ? " +
+                    "ORDER BY u2.username";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_FRIEND_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]);
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListFriend|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("user1")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getString("user2")).append("|END");
+                        } else {
+                            result.append(rs.getString("user2"));
+                        }
+
+                        String fullReturn = "AdminGetListFriend|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
 
         } catch (ClassNotFoundException e) {

@@ -2476,12 +2476,12 @@ public class Admin_demo extends JPanel{
     }
 
     private void setTextfield(JTextField textfield) {
-        textfield.setFont(new Font("Serif", Font.PLAIN, 20));
+        textfield.setFont(new Font("Comic Sans MS", Font.PLAIN, 20));
         textfield.setPreferredSize(new Dimension(260, 30));
     }
 
     private void setLabel(JLabel label) {
-        label.setFont(new Font("Serif", Font.BOLD, 20));
+        label.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
     }
 
     private ArrayList<JButton> getButton() {
@@ -2590,7 +2590,7 @@ public class Admin_demo extends JPanel{
         JLabel label1e = new JLabel("e. Xem lịch sử đăng nhập.");
         JLabel label1f = new JLabel("f. Danh sách bạn bè.");
 
-        label1.setFont(new Font("Serif", Font.ITALIC, 12));
+        label1.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label1);
@@ -2623,7 +2623,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label2 = new JLabel("Xem danh sách đăng nhập theo thứ tự thời gian. Thông tin gồm: thời gian, tên đăng nhập, họ tên.");
 
-        label2.setFont(new Font("Serif", Font.ITALIC, 12));
+        label2.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label2);
@@ -2654,7 +2654,7 @@ public class Admin_demo extends JPanel{
         JLabel label3c = new JLabel("c. Xem danh sách thành viên 1 nhóm.");
         JLabel label3d = new JLabel("d. Xem danh sách admin 1 nhóm.");
 
-        label3.setFont(new Font("Serif", Font.ITALIC, 12));
+        label3.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label3);
@@ -2689,7 +2689,7 @@ public class Admin_demo extends JPanel{
         JLabel label4c = new JLabel("c. Lọc theo tên đăng nhập.");
         JLabel label4d = new JLabel("d. Khóa tài khoản người dùng.");
 
-        label4.setFont(new Font("Serif", Font.ITALIC, 12));
+        label4.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label4);
@@ -2722,7 +2722,7 @@ public class Admin_demo extends JPanel{
         JLabel label5a = new JLabel("a. Sắp xếp theo tên/thời gian tạo.");
         JLabel label5b = new JLabel("b. Lọc theo tên.");
 
-        label5.setFont(new Font("Serif", Font.ITALIC, 12));
+        label5.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label5);
@@ -2751,7 +2751,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label6 = new JLabel("Biểu đồ số lượng người đăng ký mới theo năm: chọn năm, vẽ biểu đồ với trục hoành là tháng, trục tung là số lượng người đăng ký mới.");
 
-        label6.setFont(new Font("Serif", Font.ITALIC, 12));
+        label6.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label6);
@@ -2781,7 +2781,7 @@ public class Admin_demo extends JPanel{
         JLabel label7b = new JLabel("b. Lọc theo tên.");
         JLabel label7c = new JLabel("c. Lọc theo số lượng bạn trực tiếp (bằng, nhỏ hơn, lớn hơn 1 số được nhập).");
 
-        label7.setFont(new Font("Serif", Font.ITALIC, 12));
+        label7.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label7);
@@ -2814,7 +2814,7 @@ public class Admin_demo extends JPanel{
         JLabel label8b = new JLabel("b. Lọc theo tên.");
         JLabel label8c = new JLabel("c. Lọc theo số lượng hoạt động (bằng, nhỏ hơn, lớn hơn 1 số được nhập).");
 
-        label8.setFont(new Font("Serif", Font.ITALIC, 12));
+        label8.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label8);
@@ -2844,7 +2844,7 @@ public class Admin_demo extends JPanel{
 
         JLabel label9 = new JLabel("Biểu đồ số lượng người hoạt động theo năm: chọn năm, vẽ biểu đồ với trục hoành là tháng, trục tung là số lượng người có mở ứng dụng.");
 
-        label9.setFont(new Font("Serif", Font.ITALIC, 12));
+        label9.setFont(new Font("Comic Sans MS", Font.ITALIC, 12));
 
         ArrayList<JLabel> list = new ArrayList<>();
         list.add(label9);

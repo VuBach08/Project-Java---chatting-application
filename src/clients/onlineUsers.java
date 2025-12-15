@@ -70,6 +70,7 @@ public class onlineUsers extends JPanel {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem spam = new JMenuItem("Report For Spam");
         JMenuItem clearChatHistory = new JMenuItem("Clear Chat History");
+        JMenuItem removeFriend = new JMenuItem("Unfriend User");
 
         spam.addActionListener(e -> {
             Object selected = list.getSelectedValue();
@@ -108,9 +109,25 @@ public class onlineUsers extends JPanel {
                 }
             }
         });
+        
+        removeFriend.addActionListener(e -> {
+            Object selected = list.getSelectedValue();
+            if (selected != null && selected instanceof User) {
+                User unfriendUser = (User) selected;
+                try {
+                    JOptionPane.showMessageDialog(this, "Unfriend successfully!");
+                    parent.write("DeleteFriend|" + user.getId() + "|" + unfriendUser.getId());
+                    sideList.removeElement(selected);
+                } catch (IOException ex) {
+                    System.out.println("Unable to write");
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         popupMenu.add(spam);
         popupMenu.add(clearChatHistory);
+        popupMenu.add(removeFriend);
         popupMenu.show(list, x, y);
     }
 

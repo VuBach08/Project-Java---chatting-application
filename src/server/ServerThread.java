@@ -177,6 +177,11 @@ public class ServerThread implements Runnable {
                     	Server.serverThreadBus.boardCastUser(actual_idString, "AddFriendSuccess");
                     	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "AddFriendSuccess");
                     }
+                }else if (commandString.equals("DeleteFriend")) {
+                    String id1 = messageSplit[1];//Người gửi
+                    String id2 = messageSplit[2];//Từ user
+                    RemoveFriend(id1, id2);
+                    System.out.println("DeleteFriend");
                 }else if (commandString.equals("ChangeGroupName")) {
                     System.out.println("ChangeGroupName");
                     String groupid = messageSplit[1];
@@ -626,6 +631,27 @@ public class ServerThread implements Runnable {
             e.printStackTrace();
             System.exit(1);
             return "";
+        }
+    }
+    
+  //DeleteFriend
+    public static boolean RemoveFriend(String userId, String FriendId) {
+        String REMOVE_FRIEND_LIST_SQL = "UPDATE public.\"users\" SET friends = array_remove(friends, ?) WHERE id = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_FRIEND_LIST_SQL);
+             PreparedStatement preparedStatement1 = connection.prepareStatement(REMOVE_FRIEND_LIST_SQL)) {
+            preparedStatement.setString(1, userId);
+            preparedStatement.setString(2, FriendId);
+            preparedStatement1.setString(1, FriendId);
+            preparedStatement1.setString(2, userId);
+
+            int count = preparedStatement.executeUpdate();
+            int count1 = preparedStatement1.executeUpdate();
+            return count > 0 && count1 > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
         }
     }
     

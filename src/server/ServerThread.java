@@ -216,6 +216,10 @@ public class ServerThread implements Runnable {
                     AdminGetListLoginHistory(messageSplit);
                 }else if (commandString.equals("AdminGetListFriend")) {
                     AdminGetListFriend(messageSplit);
+                }else if (commandString.equals("AdminGetListMemGroup")) {
+                    AdminGetListMemGroup(messageSplit);
+                }else if (commandString.equals("AdminGetListAdmin")) {
+                    AdminGetListAdmin(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1138,5 +1142,91 @@ public class ServerThread implements Runnable {
             throw new RuntimeException(e);
         }
     }
-    
+    public static void AdminGetListMemGroup(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_MEM_GROUP_SQL = "SELECT groupname, username FROM public.\"groups\" g, public.\"users\" u WHERE u.id = ANY(g.users) AND g.groupid = ?";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_MEM_GROUP_SQL)) {
+
+                preparedStatement.setString(1, messageSplit[1]); // groupid
+
+                ResultSet rs = preparedStatement.executeQuery();
+                ResultSet rsAd = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListMemGroup|no data|END");
+                } else {
+                    StringBuilder resultGroup = new StringBuilder();
+                    resultGroup.append(rs.getString("groupname"));
+
+                    String fullReturnGroup = "AdminGetListMemGroup|" + resultGroup;
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturnGroup);
+
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("username"));
+
+                        if (rsAd.next() && rsAd.isLast()) {
+                            result.append("Quản trị viên");
+                        }
+
+                        String fullReturn = "AdminGetListMemGroup|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListAdmin(String[] messageSplit) {
+        try {
+            System.out.println(Arrays.toString(messageSplit));
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_ADMIN_SQL = "SELECT\n" +
+                    "    g.groupname,\n" +
+                    "    ARRAY_TO_STRING(u.username_array, ' - ') AS ad\n" +
+                    "FROM\n" +
+                    "    public.\"groups\" g\n" +
+                    "LEFT JOIN LATERAL (\n" +
+                    "    SELECT\n" +
+                    "        ARRAY(SELECT username FROM public.users WHERE id = ANY(g.admin)) AS username_array\n" +
+                    ") u ON TRUE\n" +
+                    "WHERE\n" +
+                    "    g.groupname ILIKE ?\n";
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_ADMIN_SQL)) {
+                preparedStatement.setString(1, "%" + messageSplit[1] + "%");
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListAdmin|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("ad")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getString("groupname")).append("|END");
+                        } else {
+                            result.append(rs.getString("groupname"));
+                        }
+                        String fullReturn = "AdminGetListAdmin|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

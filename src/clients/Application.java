@@ -267,7 +267,7 @@ public class Application {
         	applicationFrame = new JFrame();
         	Image icon = new ImageIcon(getClass().getResource("/icons/discord.png")).getImage();
             applicationFrame.setIconImage(icon);
-        	applicationFrame.add(new login(this));
+        	applicationFrame.add(new Admin_demo(this));
         	Application.app = this;
             applicationFrame.setForeground(Color.BLACK);
             applicationFrame.setTitle("Login");

@@ -182,6 +182,10 @@ public class ServerThread implements Runnable {
                     String id2 = messageSplit[2];//Từ user
                     RemoveFriend(id1, id2);
                     System.out.println("DeleteFriend");
+                }else if (commandString.equals("DeleteMessage")) {
+                    String id1 = messageSplit[1];//người muốn xoá
+                    String id2 = messageSplit[2];// người xoá
+                    RemoveMessage(id1 + "|" + id2);
                 }else if (commandString.equals("ChangeGroupName")) {
                     System.out.println("ChangeGroupName");
                     String groupid = messageSplit[1];
@@ -648,6 +652,22 @@ public class ServerThread implements Runnable {
             int count = preparedStatement.executeUpdate();
             int count1 = preparedStatement1.executeUpdate();
             return count > 0 && count1 > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+    
+  //RemoveMesssage
+    public static boolean RemoveMessage(String id) {
+        String REMOVE_MESSAGE_SQL = "Update public.\"messages\" SET content = '{}' WHERE \"idChat\" = ?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(REMOVE_MESSAGE_SQL)) {
+            preparedStatement.setString(1, id);
+
+            int count = preparedStatement.executeUpdate();
+            return count > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);

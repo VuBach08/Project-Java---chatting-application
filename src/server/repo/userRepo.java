@@ -120,27 +120,30 @@ public class userRepo {
             return false;
         }
     }
-
+    
     public static String hashPassword(String pw) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = digest.digest(pw.getBytes());
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] hashedBytes = digest.digest(pw.getBytes());
 
-            StringBuilder hexString = new StringBuilder();
-            for (byte hashedByte : hashedBytes) {
-                String hex = Integer.toHexString(0xff & hashedByte);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("Hashing algorithm not found");
-            e.printStackTrace();
-            return null;
-        }
-    }
+			// Convert byte array to a hexadecimal string
+			StringBuilder hexString = new StringBuilder();
+			for (byte hashedByte : hashedBytes) {
+				String hex = Integer.toHexString(0xff & hashedByte);
+				if (hex.length() == 1) {
+					hexString.append('0');
+				}
+				hexString.append(hex);
+			}
+
+			String hashedPW = hexString.toString();
+			return hashedPW;
+		} catch (NoSuchAlgorithmException e) {
+			System.out.println("Hashing algorithm not found");
+			e.printStackTrace();
+			return null;
+		}
+	}
 
     public static String generateRandomPassword(int length) {
         String validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

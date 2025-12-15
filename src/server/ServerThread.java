@@ -230,6 +230,8 @@ public class ServerThread implements Runnable {
                     AdminGetListNew(messageSplit);
                 }else if (commandString.equals("AdminGetChartNew")) {
                     AdminGetChartNew(messageSplit);
+                }else if (commandString.equals("AdminGetListFriendPlus")) {
+                    AdminGetListFriendPlus(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1556,6 +1558,59 @@ public class ServerThread implements Runnable {
                     } while (rs.next());
                     String fullReturn = "AdminGetChartNew|" + result + "|" + messageSplit[1];
                     Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListFriendPlus(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_FRIEND_PLUS_SQL = "SELECT * FROM \n" +
+                    "(\n" +
+                    "\tSELECT * FROM (SELECT tu1.id, array_length(tu1.friends, 1) AS dirfr, SUM(array_length(tu2.friends, 1)) AS total FROM users tu1 LEFT JOIN users tu2 ON tu2.id = ANY(tu1.friends) GROUP BY tu1.id, tu1.friends) AS fr JOIN users tu3 ON tu3.id = fr.id\n" +
+                    ") AS newtable ";
+
+            if (messageSplit.length >= 4) {
+                ADMIN_GET_LIST_FRIEND_PLUS_SQL += " WHERE username ILIKE ?";
+            }
+            if (messageSplit.length == 5) {
+                ADMIN_GET_LIST_FRIEND_PLUS_SQL += " AND dirfr " + messageSplit[3];
+            }
+
+            if (messageSplit[1].equals("1")) {
+                ADMIN_GET_LIST_FRIEND_PLUS_SQL += " ORDER BY username";
+            } else if (messageSplit[1].equals("-1")) {
+                ADMIN_GET_LIST_FRIEND_PLUS_SQL += " ORDER BY \"createAt\"";
+            }
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_FRIEND_PLUS_SQL)) {
+                if (messageSplit.length >= 4) {
+                    preparedStatement.setString(1, messageSplit[2] + "%");
+                }
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListFriendPlus|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("username")).append(", ");
+                        result.append(rs.getInt("dirfr")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getInt("total") + rs.getInt("dirfr")).append("|END");
+                        } else {
+                            result.append(rs.getInt("total") + rs.getInt("dirfr"));
+                        }
+
+                        String fullReturn = "AdminGetListFriendPlus|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);

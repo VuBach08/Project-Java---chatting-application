@@ -169,6 +169,11 @@ public class ServerThread implements Runnable {
                     String content = messageSplit[2];// người chặn
                 	String msg = SearchMessageGlobal(id,content);
                 	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GlobalSearch" + msg);
+                }else if (commandString.equals("BlockAccount")) {
+                    System.out.println("BlockAccount");
+                    String id1 = messageSplit[1];//người muốn chặn
+                    String id2 = messageSplit[2];// người chặn
+                    BlockAccount(id1, id2);
                 }else if (commandString.equals("AddFriend")) {
                     String id1 = messageSplit[1];//From
                     String id2 = messageSplit[2];//To
@@ -267,6 +272,7 @@ public class ServerThread implements Runnable {
         os.flush();
     }
     
+    //HASH PASSWORD
     public static String hashPassword(String pw) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -291,6 +297,7 @@ public class ServerThread implements Runnable {
 		}
 	}
     
+    //GET FRIEND/GROUP LIST
     public static String GetListFriendsAndGroups(String id) {
     	String FIND_ONLINE_FRIENDS = "SELECT u2.id, u2.fullname, u2.lock, u2.\"isOnline\" ,u2.blocks FROM public.\"users\" u JOIN public.\"users\" u2 "
     			+ "ON u2.id = ANY (u.friends) where u.id = ? and ( not(u2.id = ANY(u.blocks)) OR u.blocks is null)";
@@ -332,7 +339,7 @@ public class ServerThread implements Runnable {
 		}
     }
     
-  //Get Message Data
+  //GET MESSAGE DATA
     public static String[] GetMessage(String id) {
         String FIND_MESSAGE_SQL = "SELECT \"idChat\",content FROM public.\"messages\" where \"idChat\" = ?";
         String GET_USER1_SQL = "SELECT username FROM users WHERE id = ?";
@@ -396,6 +403,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    //GET GROUP
     public static String[] GetGroup(String id) {
         String FIND_MESSAGE_SQL = "SELECT groupid,content FROM public.\"groups\" where groupid = ?";
         String FIND_MEMBER_SQL = "SELECT u.id,u.fullname,CASE WHEN u.id = ANY(mbs.admin) "
@@ -446,6 +454,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    // MESSAGE SEARCH
     public static String SearchMessageGlobal(String idUser,String content) {
     	String like_content = "%" + content+ "%";
         String FIND_MESSAGE_SQL = "SELECT * FROM ("
@@ -479,6 +488,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    // CHECK IF MESSAGE EXISTED OR NOT
     public static String[] CheckMessageExists(String id, String id2) {
         String FIND_MESSAGE_SQL = "SELECT \"idChat\",content FROM public.\"messages\" where \"idChat\" = ? or \"idChat\" = ?";
         String idChat1 = id + "|" + id2;
@@ -505,6 +515,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    // UPDATE MESSAGE
     public static boolean UpdateExistsMessage(String id, String id2, String content) {
         String idChat1 = id + "|" + id2;
         String idChat2 = id2 + "|" + id;
@@ -603,6 +614,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    //ADD FRIEND
     public static String AddFriend(String userId, String FriendName) {
         String ADD_FRIEND_SQL = "UPDATE public.\"users\" SET friends = array_append(friends,?)"
                 + "WHERE id =? and exists (select * from public.\"users\" where id = ?)";
@@ -638,7 +650,7 @@ public class ServerThread implements Runnable {
         }
     }
     
-  //DeleteFriend
+  //DELETE FRIEND
     public static boolean RemoveFriend(String userId, String FriendId) {
         String REMOVE_FRIEND_LIST_SQL = "UPDATE public.\"users\" SET friends = array_remove(friends, ?) WHERE id = ?";
         try (Connection connection = DriverManager.getConnection(URL, USER, PW);
@@ -659,7 +671,7 @@ public class ServerThread implements Runnable {
         }
     }
     
-  //RemoveMesssage
+  //REMOVE MESSAGE
     public static boolean RemoveMessage(String id) {
         String REMOVE_MESSAGE_SQL = "Update public.\"messages\" SET content = '{}' WHERE \"idChat\" = ?";
         try (Connection connection = DriverManager.getConnection(URL, USER, PW);
@@ -719,6 +731,7 @@ public class ServerThread implements Runnable {
         }
     }
     
+    //GET FIREND LIST
     public static String GetFriendList(String id) {
         String GET_FRIEND_LIST_SQL = "select p.id,p.fullname from public.\"users\" u join public.\"users\" "
                 + "p on p.id = any(u.friends) where u.id = ? group by p.id,u.fullname,u.id";
@@ -798,7 +811,25 @@ public class ServerThread implements Runnable {
             return false;
         }
     }
-  //Change Group Name
+    //BLOCK ACCOUNT (For spamming report)
+    public static boolean BlockAccount(String id, String id2) {
+        String BLOCK_ACCOUNT_SQL = "UPDATE public.\"users\" SET blocks = array_append(blocks,?)"
+                + "WHERE id =? and exists (select * from public.\"users\" where id = ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(BLOCK_ACCOUNT_SQL)) {
+            preparedStatement.setString(1, id2);
+            preparedStatement.setString(2, id);
+            preparedStatement.setString(3, id2);
+            int count = preparedStatement.executeUpdate();
+
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+  //CHANGE GROUPCHAT NAME
     public static boolean ChangeGroupName(String groupID, String adminId, String newName) {
         String UPDATE_GROUP_NAME_SQL = "UPDATE public.groups"
                 + " SET groupname = ?"
@@ -820,7 +851,7 @@ public class ServerThread implements Runnable {
         }
     }
 
-    //Add Member To Group
+    //ADD MEMBER TO GROUP
     public static boolean AddMemberToGroup(String groupID, String name) {
         String ADD_MEMBER_SQL = "UPDATE public.\"groups\" SET users = array_append(users,?)"
                 + "WHERE groupid =?";
@@ -849,7 +880,7 @@ public class ServerThread implements Runnable {
         }
     }
     
-    //Set admin Group
+    //SET ADMIN IN GROUP
     public static boolean SetAdmin(String groupID, String id) {
         String checkValid = "SELECT * FROM public.\"groups\" where "
         		+ "? <> any(admin) and groupid = ? and ? = any(users)";
@@ -878,7 +909,8 @@ public class ServerThread implements Runnable {
             return true;
         }
     }
-  //Send message to group chat
+    
+  //SEND MESSAGE TO GROUPCHAT
     public static boolean UpdateGroupChatMessage(String id, String content) {
         String UPDATE_MESSAGE_SQL = "Update public.\"groups\" SET content = array_append(content,?) WHERE groupid = ?";
         String GET_MEMBER_MESSAGE_SQL = "SELECT users FROM public.\"groups\" WHERE groupid = ?";

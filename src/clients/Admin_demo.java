@@ -1386,14 +1386,14 @@ public class Admin_demo extends JPanel{
 
         gbcMain.gridwidth = 1;
 
-        JButton btn = new JButton("Xem danh sách đăng nhâp");
+        JButton btn = new JButton("Refresh");
 
         // add action to the button
         btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    parent.write("AdminGetListLogin|");
+                try {                	System.out.println("getlogin");
+                    parent.write("AdminGetListLogin|bach08");
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }

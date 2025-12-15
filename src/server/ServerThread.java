@@ -232,6 +232,10 @@ public class ServerThread implements Runnable {
                     AdminGetChartNew(messageSplit);
                 }else if (commandString.equals("AdminGetListFriendPlus")) {
                     AdminGetListFriendPlus(messageSplit);
+                }else if (commandString.equals("AdminGetListOpen")) {
+                    AdminGetListOpen(messageSplit);
+                } else if (commandString.equals("AdminGetChartOpen")) {
+                    AdminGetChartOpen(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1611,6 +1615,141 @@ public class ServerThread implements Runnable {
                         String fullReturn = "AdminGetListFriendPlus|" + result;
                         Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
                     } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListOpen(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_OPEN_SQL = "SELECT createat.username,\n" +
+                    "    COALESCE(\"openApp\", 0) AS \"openApp\",\n" +
+                    "    COALESCE(\"singleChat\", 0) AS \"singleChat\",\n" +
+                    "    COALESCE(\"groupChat\", 0) AS \"groupChat\",\n" +
+                    "    createat.\"createAt\"\n" +
+                    "FROM (\n" +
+                    "    SELECT username, COUNT(*) AS \"openApp\"\n" +
+                    "    FROM logs\n" +
+                    "    WHERE username ILIKE ? AND logs.logdate::DATE BETWEEN ?::DATE AND ?::DATE\n" + // 1 - 2 - 3
+                    "    GROUP BY username\n" +
+                    ") AS openapp\n" +
+                    "JOIN (\n" +
+                    "    SELECT username, \"createAt\"\n" +
+                    "    FROM users\n" +
+                    "    WHERE username ILIKE ?\n" + // 4
+                    ") AS createat ON openapp.username = createat.username\n" +
+                    "LEFT JOIN (\n" +
+                    "    SELECT username, COUNT(DISTINCT \"idChat\") AS \"singleChat\"\n" +
+                    "    FROM systems\n" +
+                    "    WHERE username ILIKE ? AND date(systems.time AT TIME ZONE 'UTC+7') BETWEEN ?::DATE AND ?::DATE AND type = 1\n" + // 5 - 6 - 7
+                    "    GROUP BY username\n" +
+                    ") AS singlechat ON createat.username = singlechat.username\n" +
+                    "LEFT JOIN (\n" +
+                    "    SELECT username, COUNT(DISTINCT \"idChat\") AS \"groupChat\"\n" +
+                    "    FROM systems\n" +
+                    "    WHERE username ILIKE ? AND date(systems.time AT TIME ZONE 'UTC+7') BETWEEN ?::DATE AND ?::DATE AND type = 2\n" + // 8 - 9 - 10
+                    "    GROUP BY username\n" +
+                    ") AS groupchat  ON createat.username = groupchat.username\n";
+            if (messageSplit.length == 6) {
+                ADMIN_GET_LIST_OPEN_SQL += "WHERE \"openApp\" " + messageSplit[4] + "\n";
+            } else if (messageSplit.length == 8) {
+                ADMIN_GET_LIST_OPEN_SQL += "WHERE \"openApp\" " + messageSplit[5] + "\n";
+            }
+
+            if (messageSplit[1].equals("1")) {
+                ADMIN_GET_LIST_OPEN_SQL += " ORDER BY username";
+            } else if (messageSplit[1].equals("-1")) {
+                ADMIN_GET_LIST_OPEN_SQL += " ORDER BY \"createAt\"";
+            }
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_OPEN_SQL)) {
+                if (messageSplit.length == 5 || messageSplit.length == 6) {
+                    preparedStatement.setString(1, "%");
+                    preparedStatement.setString(4, "%");
+                    preparedStatement.setString(5, "%");
+                    preparedStatement.setString(8, "%");
+                } else if (messageSplit.length == 7 || messageSplit.length == 8) {
+                    preparedStatement.setString(1, "%" + messageSplit[4] + "%");
+                    preparedStatement.setString(4, "%" + messageSplit[4] + "%");
+                    preparedStatement.setString(5, "%" + messageSplit[4] + "%");
+                    preparedStatement.setString(8, "%" + messageSplit[4] + "%");
+                }
+
+                preparedStatement.setString(2, messageSplit[2]);
+                preparedStatement.setString(3, messageSplit[3]);
+                preparedStatement.setString(6, messageSplit[2]);
+                preparedStatement.setString(7, messageSplit[3]);
+                preparedStatement.setString(9, messageSplit[2]);
+                preparedStatement.setString(10, messageSplit[3]);
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListOpen|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("username")).append(", ");
+                        result.append(rs.getInt("openApp")).append(", ");
+                        result.append(rs.getInt("singleChat")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getInt("groupChat")).append(", ").append("|END");
+                        } else {
+                            result.append(rs.getInt("groupChat")).append(", ");
+                        }
+
+                        String fullReturn = "AdminGetListOpen|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetChartOpen(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_CHART_NEW_SQL = " WITH months AS (\n" +
+                    "                SELECT generate_series(1, 12) AS month\n" +
+                    "            )\n" +
+                    "            SELECT months.month,\n" +
+                    "                   COUNT(logs.logdate) AS row_count\n" +
+                    "            FROM months\n" +
+                    "            LEFT JOIN logs ON EXTRACT(MONTH FROM logs.logdate) = months.month\n" +
+                    "                               AND EXTRACT(YEAR FROM logs.logdate) = ?\n" +
+                    "            GROUP BY months.month\n" +
+                    "            ORDER BY months.month;";
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_CHART_NEW_SQL)) {
+                preparedStatement.setInt(1, Integer.parseInt(messageSplit[1]));
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetChartOpen|no data|END");
+                } else {
+                    StringBuilder result = new StringBuilder();
+                    do {
+                        result.append(rs.getInt("month")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getBigDecimal("row_count"));
+                        } else {
+                            result.append(rs.getBigDecimal("row_count")).append(", ");
+                        }
+                    } while (rs.next());
+                    String fullReturn = "AdminGetChartOpen|" + result + "|" + messageSplit[1];
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);

@@ -218,6 +218,8 @@ public class ServerThread implements Runnable {
                     AdminGetListFriend(messageSplit);
                 }else if (commandString.equals("AdminGetListLogin")) {
                     AdminGetListLogin(messageSplit);
+                }else if (commandString.equals("AdminGetListGroup")) {
+                    AdminGetListGroup(messageSplit);
                 }else if (commandString.equals("AdminGetListMemGroup")) {
                     AdminGetListMemGroup(messageSplit);
                 }else if (commandString.equals("AdminGetListAdmin")) {
@@ -1175,6 +1177,63 @@ public class ServerThread implements Runnable {
                         }
 
                         String fullReturn = "AdminGetListLogin|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListGroup(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_GROUP_SQL;
+
+            ADMIN_GET_LIST_GROUP_SQL = "SELECT\n" +
+                    "    g.groupname,\n" +
+                    "    ARRAY_TO_STRING(u.username_array, ' - ') AS ad,\n" +
+                    "    ARRAY_LENGTH(g.users, 1) AS mems,\n" +
+                    "    g.\"createAt\" AS createat\n" +
+                    "FROM\n" +
+                    "    public.\"groups\" g\n" +
+                    "LEFT JOIN LATERAL (\n" +
+                    "    SELECT ARRAY(SELECT username FROM public.users WHERE id = ANY(g.admin)) AS username_array\n" +
+                    ") u ON TRUE\n" +
+                    "WHERE\n" +
+                    "    g.groupname ILIKE ?\n";
+
+            if (messageSplit[1].equals("1") && messageSplit[2].equals("1")) {
+                ADMIN_GET_LIST_GROUP_SQL += " ORDER BY groupname DESC, \"createAt\" DESC";
+            } else if (messageSplit[1].equals("1")) {
+                ADMIN_GET_LIST_GROUP_SQL += " ORDER BY groupname DESC";
+            } else if (messageSplit[2].equals("1")) {
+                ADMIN_GET_LIST_GROUP_SQL += " ORDER BY \"createAt\" DESC";
+            }
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_GROUP_SQL)) {
+                preparedStatement.setString(1, "%" + messageSplit[3] + "%");
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListGroup|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("groupname")).append(", ");
+                        result.append(rs.getInt("mems")).append(", ");
+                        result.append(rs.getString("ad")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getString("createat")).append("|END");
+                        } else {
+                            result.append(rs.getString("createat")).append(", ");
+                        }
+
+                        String fullReturn = "AdminGetListGroup|" + result;
                         Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
                     } while (rs.next());
                 }

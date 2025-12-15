@@ -220,6 +220,8 @@ public class ServerThread implements Runnable {
                     AdminGetListMemGroup(messageSplit);
                 }else if (commandString.equals("AdminGetListAdmin")) {
                     AdminGetListAdmin(messageSplit);
+                }else if (commandString.equals("AdminGetListSpam")) {
+                    AdminGetListSpam(messageSplit);
                 }
             }
         } catch (IOException e) {
@@ -1218,6 +1220,59 @@ public class ServerThread implements Runnable {
                             result.append(rs.getString("groupname"));
                         }
                         String fullReturn = "AdminGetListAdmin|" + result;
+                        Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
+                    } while (rs.next());
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void AdminGetListSpam(String[] messageSplit) {
+        try {
+            Class.forName(JDBC_DRIVER);
+            String ADMIN_GET_LIST_SPAM_SQL = "SELECT * FROM public.\"spams\"";
+
+            if (messageSplit.length == 3) {} else {
+                if (messageSplit[2].equals("1")) {
+                    ADMIN_GET_LIST_SPAM_SQL += " WHERE username ILIKE ?";
+                } else if (messageSplit[2].equals("-1")) {
+                    ADMIN_GET_LIST_SPAM_SQL += " WHERE EXTRACT(YEAR FROM date)::TEXT ILIKE ?";
+                }
+            }
+
+            if (messageSplit[1].equals("1")) {
+                ADMIN_GET_LIST_SPAM_SQL += " ORDER BY username ASC";
+            } else if (messageSplit[1].equals("-1")) {
+                ADMIN_GET_LIST_SPAM_SQL += " ORDER BY date ASC";
+            }
+
+            try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+                 PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_GET_LIST_SPAM_SQL)) {
+
+                if (messageSplit.length != 3) {
+                    preparedStatement.setString(1, "%" + messageSplit[3] + "%");
+                }
+
+                ResultSet rs = preparedStatement.executeQuery();
+
+                if (!rs.next()) {
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], "AdminGetListSpam|no data|END");
+                } else {
+                    do {
+                        StringBuilder result = new StringBuilder();
+                        result.append(rs.getString("username")).append(", ");
+                        result.append(rs.getString("date")).append(", ");
+                        if (rs.isLast()) {
+                            result.append(rs.getString("ByUser")).append("|END");
+                        } else {
+                            result.append(rs.getString("ByUser"));
+                        }
+
+                        String fullReturn = "AdminGetListSpam|" + result;
                         Server.serverThreadBus.boardCast(messageSplit[messageSplit.length - 1], fullReturn);
                     } while (rs.next());
                 }

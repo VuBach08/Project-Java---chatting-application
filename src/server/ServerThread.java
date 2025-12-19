@@ -150,30 +150,6 @@ public class ServerThread implements Runnable {
                         ServerThread.InsertMessage(id1, id2, content);
                     }
                     Server.serverThreadBus.boardCastUser(id2, "SendToUser|" + id1 + "|" + content);
-                }else if (commandString.equals("CreateGroup")) {
-                    System.out.println("CreateGroup "+ message);
-                    String[] newDataString = message.split("\\|\\|");
-                    String name = newDataString[1];//Người gửi
-                    String id = newDataString[2];//Từ user
-                    String members = newDataString[3];
-                    InsertGroup(name, id,members);
-                }else if (commandString.equals("Online")) {
-                    String id = messageSplit[1];//Từ user
-                    SetOnline(id);
-                } else if (commandString.equals("Offline")) {
-                    System.out.println("Offline");
-                    String id = messageSplit[1];//Từ user
-                    SetOffline(id);
-                }else if(commandString.equals("GlobalSearch")) {
-                	String id = messageSplit[1];//người muốn chặn
-                    String content = messageSplit[2];// người chặn
-                	String msg = SearchMessageGlobal(id,content);
-                	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GlobalSearch" + msg);
-                }else if (commandString.equals("BlockAccount")) {
-                    System.out.println("BlockAccount");
-                    String id1 = messageSplit[1];//người muốn chặn
-                    String id2 = messageSplit[2];// người chặn
-                    BlockAccount(id1, id2);
                 }else if (commandString.equals("AddFriend")) {
                     String id1 = messageSplit[1];//From
                     String id2 = messageSplit[2];//To
@@ -191,6 +167,33 @@ public class ServerThread implements Runnable {
                     String id1 = messageSplit[1];//người muốn xoá
                     String id2 = messageSplit[2];// người xoá
                     RemoveMessage(id1 + "|" + id2);
+                }else if (commandString.equals("CreateGroup")) {
+                    System.out.println("CreateGroup "+ message);
+                    String[] newDataString = message.split("\\|\\|");
+                    String name = newDataString[1];//Người gửi
+                    String id = newDataString[2];//Từ user
+                    String members = newDataString[3];
+                    InsertGroup(name, id,members);
+                }else if (commandString.equals("GetFriend")) {
+                    String result = GetFriendList(messageSplit[1]);
+                    Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GetFriend" +result);
+                }else if (commandString.equals("Online")) {
+                    String id = messageSplit[1];//Từ user
+                    SetOnline(id);
+                } else if (commandString.equals("Offline")) {
+                    System.out.println("Offline");
+                    String id = messageSplit[1];//Từ user
+                    SetOffline(id);
+                }else if(commandString.equals("GlobalSearch")) {
+                	String id = messageSplit[1];//người muốn chặn
+                    String content = messageSplit[2];// người chặn
+                	String msg = SearchMessageGlobal(id,content);
+                	Server.serverThreadBus.boardCast(messageSplit[messageSplit.length -1], "GlobalSearch" + msg);
+                }else if (commandString.equals("BlockAccount")) {
+                    System.out.println("BlockAccount");
+                    String id1 = messageSplit[1];//người muốn chặn
+                    String id2 = messageSplit[2];// người chặn
+                    BlockAccount(id1, id2);
                 }else if (commandString.equals("ChangeGroupName")) {
                     System.out.println("ChangeGroupName");
                     String groupid = messageSplit[1];
@@ -205,6 +208,10 @@ public class ServerThread implements Runnable {
                     String groupid = messageSplit[1];
                     String id = messageSplit[2];
                     SetAdmin(groupid, id);
+                }else if (commandString.equals("RemoveAdminGroup")) {
+                    String groupid = messageSplit[1];
+                    String id = messageSplit[2];
+                    RemoveAdmin(groupid, id);
                 }else if (commandString.equals("GroupChat")) {
                     System.out.println("GroupChat");
                     String groupid = messageSplit[1];
@@ -892,6 +899,35 @@ public class ServerThread implements Runnable {
         	smt.setString(1, id);
         	smt.setString(2, groupID);
         	smt.setString(3, id);
+        	
+        	ResultSet rSet = smt.executeQuery();
+        	if(rSet.next()) {
+	            preparedStatement.setString(1, id);
+	            preparedStatement.setString(2, groupID);
+	
+	            int count = preparedStatement.executeUpdate();
+	
+	            return count > 0;
+        	}
+        	return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+    
+    //Remove admin
+    public static boolean RemoveAdmin(String groupID, String id) {
+        String checkValid = "SELECT * FROM public.\"groups\" where "
+        		+ "? = any(admin) and groupid = ?";
+        String AddAdmin = "UPDATE public.\"groups\" SET admin = array_remove(admin,?) "
+        		+ "WHERE groupid =?";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(AddAdmin);
+        		PreparedStatement smt = connection.prepareStatement(checkValid)) {
+        	smt.setString(1, id);
+        	smt.setString(2, groupID);
         	
         	ResultSet rSet = smt.executeQuery();
         	if(rSet.next()) {

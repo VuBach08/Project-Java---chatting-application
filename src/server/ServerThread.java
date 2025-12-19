@@ -212,6 +212,11 @@ public class ServerThread implements Runnable {
                     String groupid = messageSplit[1];
                     String id = messageSplit[2];
                     RemoveAdmin(groupid, id);
+                }else if (commandString.equals("RemoveMemberGroup")) {
+                    System.out.println("RemoveMemberGroup");
+                    String groupid = messageSplit[1];
+                    String id = messageSplit[2];
+                    RemoveMemberGroup(groupid, id);
                 }else if (commandString.equals("GroupChat")) {
                     System.out.println("GroupChat");
                     String groupid = messageSplit[1];
@@ -939,6 +944,26 @@ public class ServerThread implements Runnable {
 	            return count > 0;
         	}
         	return false;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return true;
+        }
+    }
+    
+  //Remove Member out of Group
+    public static boolean RemoveMemberGroup(String groupID, String memeberid) {
+        String ADD_MEMBER_SQL = "UPDATE public.\"groups\" SET users = array_remove(users,?)"
+                + "WHERE groupid =?";
+
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(ADD_MEMBER_SQL)) {
+            preparedStatement.setString(1, memeberid);
+            preparedStatement.setString(2, groupID);
+
+            int count = preparedStatement.executeUpdate();
+
+            return count > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);

@@ -69,6 +69,7 @@ public class onlineUsers extends JPanel {
     private void showPopupMenuDirect(int x, int y, JList<Object> list, User user) {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem spam = new JMenuItem("Report For Spam");
+        JMenuItem blockUser = new JMenuItem("Block User");
         JMenuItem clearChatHistory = new JMenuItem("Clear Chat History");
         JMenuItem removeFriend = new JMenuItem("Unfriend User");
 
@@ -83,6 +84,21 @@ public class onlineUsers extends JPanel {
                     JOptionPane.showMessageDialog(this, "The user is successfully reported!");
                     parent.write("BlockAccount|" + user.getId() + "|" + reportedUser.getId());
                     sideList.removeElement(selected);
+                } catch (IOException ex) {
+                    System.out.println("Unable to write");
+                    ex.printStackTrace();
+                }
+            }
+        });
+        
+        blockUser.addActionListener(e -> {
+            Object selected = list.getSelectedValue();
+            if (selected != null && selected instanceof User) {
+                User blockedUser = (User) selected;
+                try {
+                    parent.write("BlockAccount|" + user.getId() + "|" + blockedUser.getId());
+                    sideList.removeElement(selected);
+                    JOptionPane.showMessageDialog(this, "The user is blocked!");
                 } catch (IOException ex) {
                     System.out.println("Unable to write");
                     ex.printStackTrace();

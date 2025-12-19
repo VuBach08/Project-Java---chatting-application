@@ -222,6 +222,11 @@ public class ServerThread implements Runnable {
                     String groupid = messageSplit[1];
                     String content = messageSplit[2];
                     UpdateGroupChatMessage(groupid, content);
+                }else if (commandString.equals("ReportSpam")) {
+                    System.out.println("ReportSpam");
+                    String username = messageSplit[1];
+                    String byUser = messageSplit[2];
+                    ReportSpam(username, byUser);
                 // =====================================
                 // chức năng ADMIN
             	}else if (commandString.equals("AdminGetListUser")) {
@@ -992,6 +997,30 @@ public class ServerThread implements Runnable {
                 	Server.serverThreadBus.boardCastUser(u, "UpdateMessage|"+id+"|"+content);
                 }
             }
+            int count = preparedStatement.executeUpdate();
+
+            return count > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return false;
+        }
+    }
+    
+    //Report Spam -- add to db (done)
+    public static boolean ReportSpam(String username, String byUser) {
+        String UPDATE_MESSAGE_SQL = "Insert into public.\"spams\" (username, \"ByUser\", date) Values (?, ?, ?)";
+        try (Connection connection = DriverManager.getConnection(URL, USER, PW);
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_MESSAGE_SQL)) {
+            ZoneId utc = ZoneId.of("UTC+7");
+            ZonedDateTime curDate = ZonedDateTime.now(utc);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedDate = curDate.format(formatter);
+            Date sqlDate = Date.valueOf(formattedDate);
+
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, byUser);
+            preparedStatement.setDate(3, sqlDate);
             int count = preparedStatement.executeUpdate();
 
             return count > 0;

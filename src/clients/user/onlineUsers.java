@@ -1,5 +1,7 @@
-package clients;
+package clients.user;
 
+import clients.Application;
+import clients.models.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -99,8 +101,6 @@ public class onlineUsers extends JPanel {
                     parent.write("BlockAccount|" + user.getId() + "|" + blockedUser.getId());
                     sideList.removeElement(selected);
                     JOptionPane.showMessageDialog(this, "The user is blocked!");
-                    parent.write("DeleteFriend|" + user.getId() + "|" + blockedUser.getId());
-                    sideList.removeElement(selected);
                 } catch (IOException ex) {
                     System.out.println("Unable to write");
                     ex.printStackTrace();
@@ -112,12 +112,15 @@ public class onlineUsers extends JPanel {
             Object selected = list.getSelectedValue();
             if (selected != null && selected instanceof User) {
                 User u = (User) selected;
+                // You can perform an action here, e.g., based on the selected item
+
                 int choice = JOptionPane.showConfirmDialog(this, "Would you like to clear all of the chat history? (You cannot undo after this)", "Clear Chat History?", JOptionPane.YES_NO_OPTION);
+                //Deal with task in accordance to choice
                 if (choice == JOptionPane.YES_OPTION) {
                     try {
                         parent.write("DeleteMessage|" + parent.currentUser.getId() + "|" + u.getId());
                     } catch (IOException e1) {
-                    	System.out.println("Unable to write");
+                        // TODO Auto-generated catch block
                         e1.printStackTrace();
                     }
                     JOptionPane.showMessageDialog(this, "Chat history cleared");
@@ -392,11 +395,11 @@ public class onlineUsers extends JPanel {
             }
         } else {
             model.clear();
-            for (clients.models.User element : parent.currentUser.friends) {
+            for (User element : parent.currentUser.friends) {
                 model.addElement(element);
 
             }
-            for (clients.models.groupChat element : parent.currentUser.getGroupList()) {
+            for (groupChat element : parent.currentUser.getGroupList()) {
                 model.addElement(element);
             }
         }

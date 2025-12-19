@@ -1,5 +1,19 @@
 package clients;
 
+import clients.admin.Admin_demo;
+
+import clients.user.chatting;
+import clients.user.friends;
+import clients.user.globalChatHistory;
+import clients.user.home;
+import clients.user.login;
+import clients.user.onlineUsers;
+import clients.user.profile;
+import clients.user.register;
+import clients.models.User;
+import clients.models.groupChat;
+
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -237,6 +251,40 @@ public class Application {
                         	}
                         }else if(dataSplit[0].equals("AddFriendSuccess")) {
                         	JOptionPane.showMessageDialog(mainPanel, "You just added new friend to the friends list");
+                        }else if(dataSplit[0].equals("UserProfileData")) {
+                            // Format: UserProfileData|username|fullname|email|address|dob|gender
+                            if(mainPanel instanceof home) {
+                                home home = (home) mainPanel;
+                                if(home.profilePanel != null) {
+                                    profile profilePanel = (profile) home.profilePanel;
+                                    if(dataSplit.length >= 7) {
+                                        String username = dataSplit[1];
+                                        String fullname = dataSplit[2];
+                                        String email = dataSplit[3];
+                                        String address = dataSplit[4];
+                                        String dob = dataSplit[5];
+                                        String gender = dataSplit[6];
+                                        profilePanel.updateProfileDisplay(username, fullname, email, address, dob, gender);
+                                    }
+                                }
+                            }
+                        }else if(dataSplit[0].equals("UpdateFullNameSuccess")) {
+                        	if(mainPanel instanceof home) {
+                        		JOptionPane.showMessageDialog(mainPanel, "Full name updated successfully!");
+                        	}
+                        }else if(dataSplit[0].equals("UpdateFullNameFailed")) {
+                        	if(mainPanel instanceof home) {
+                        		JOptionPane.showMessageDialog(mainPanel, "Failed to update full name!", "Error", JOptionPane.ERROR_MESSAGE);
+                        	}
+                        }else if(dataSplit[0].equals("ChangePasswordSuccess")) {
+                        	if(mainPanel instanceof home) {
+                        		JOptionPane.showMessageDialog(mainPanel, "Password changed successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                        	}
+                        }else if(dataSplit[0].equals("ChangePasswordFailed")) {
+                        	if(mainPanel instanceof home) {
+                        		String errorMsg = dataSplit.length > 1 ? dataSplit[1] : "Failed to change password!";
+                        		JOptionPane.showMessageDialog(mainPanel, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+                        	}
                         } else if (mainPanel instanceof Admin_demo) {
 							Admin_demo adminDemo = (Admin_demo) mainPanel;
 							adminDemo.setUpSocket(message);

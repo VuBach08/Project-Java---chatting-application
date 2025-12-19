@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 
-import clients.User;
-import clients.groupChat;
+import clients.models.*;;
+
 
 public class Server {
 

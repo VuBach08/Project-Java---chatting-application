@@ -1152,6 +1152,7 @@ public class Admin_demo extends JPanel{
                 if (!pw.isEmpty() && !repw.isEmpty() && pw.equals(repw)) {
                     try {
                         parent.write("AdminRenewPassword|%s|%s".formatted(un, pw));
+                        System.out.println(pw);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }

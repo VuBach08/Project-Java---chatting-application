@@ -60,8 +60,8 @@ public class userRepo {
         }
     }
     public static boolean ForgotPassword(String email) {
-    	final String email_password = "kirito1212";
-		String from = "nvbach21@clc.fitus.edu.vn";
+    	final String email_password = "hjrddqcnofpgiyuq";
+		String from = "vubach08092003@gmail.com";
 		String host = "smtp.gmail.com";//or IP address
 
 		Properties props = new Properties();
@@ -98,6 +98,7 @@ public class userRepo {
 	     } catch (MessagingException err) {err.printStackTrace();}
 	    return false;
     }
+    
     public static boolean register(String id, String name, String fullname, String email, String password) {
         String INSERT_USERS_SQL = "INSERT INTO public.\"users\" (id, username, fullname, email, password, \"createAt\") values (?,?,?,?,?,?)";
         String USER_EXIST = "SELECT * FROM public.\"users\" where email = ? or username = ?";

@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
+import clients.models.User;
 import server.Server;
 
 public class AdminRepo {
@@ -315,8 +316,8 @@ public class AdminRepo {
 
             try (Connection connection = DriverManager.getConnection(URL, USER, PW);
                  PreparedStatement preparedStatement = connection.prepareStatement(ADMIN_RENEW_PASSWORD_SQL)) {
-                String hash = hashPassword(messageSplit[2]);
-                preparedStatement.setString(1, hash);
+                String hash = User.hashPassword(messageSplit[2]);
+                preparedStatement.setString(1, hashPassword(hash));
                 preparedStatement.setString(2, messageSplit[1]);
 
                 int rowsAffected = preparedStatement.executeUpdate();
